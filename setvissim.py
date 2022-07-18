@@ -1,8 +1,16 @@
 # ==========================================================================
 # Author : HyeAnn Lee
 # ==========================================================================
-from warning import *
-import random, os, math
+import json
+import logging
+import logging.config
+import math
+import os
+import random
+
+config = json.load(open("./logger.json"))
+logging.config.dictConfig(config)
+logger = logging.getLogger(__name__)
 
 
 def convert_signal_to_enum(Signal):
@@ -39,7 +47,7 @@ def check_sig_file(Vissim):
     while SC_Iter.Valid:
         sig_file = SC_Iter.Item.AttValue('SupplyFile2')
         if (sig_file != "") and (not os.path.exists(sig_file)):
-            warning(" Error from 'check_sig_file()' : At least one of sig files is missing.")
+            logger.error("check_sig_file() : At least one of sig files is missing.")
 
         SC_Iter.Next()
 
@@ -55,7 +63,7 @@ def get_travtm_info(Vissim):
     # Check for duplicates
     tempset = set(link)
     if len(link) != len(tempset):
-        warning(" Error from 'get_travtm_info()' : There is an invalid Vehicle Travel Time Measurement.")
+        logger.error("get_travtm_info() : There is an invalid Vehicle Travel Time Measurement.")
 
     return link
 
@@ -365,7 +373,7 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
 
     # Validation check
     if math.ceil(SimLen / TimeInterval) != num_timeint:
-        warning(" ERROR : The number of sheets in VehicleInput Excel file is incorrect... Check the file again.")
+        logger.error("set_vehicleinput() : The number of sheets in VehicleInput Excel file is incorrect... Check the file again.")
 
     # Remove existing VI
     All_VIs = Vissim.Net.VehicleInputs.GetAll()

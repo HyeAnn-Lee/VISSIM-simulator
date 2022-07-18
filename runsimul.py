@@ -1,7 +1,13 @@
 # ==========================================================================
 # Author : HyeAnn Lee
 # ==========================================================================
-from warning import *
+import json
+import logging
+import logging.config
+
+config = json.load(open("./logger.json"))
+logging.config.dictConfig(config)
+logger = logging.getLogger(__name__)
 
 
 def _get_AttValue_num(item, attribute):
@@ -17,7 +23,7 @@ def _get_AttValue_num(item, attribute):
         return 0
 
     if value < 0:
-        warning(" ERROR : Negative AttValue has been detected...")
+        logger.error("_get_AttValue_num() : Negative AttValue has been detected...")
 
     return value
 

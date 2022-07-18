@@ -1,9 +1,16 @@
 # ==========================================================================
 # Author : HyeAnn Lee
 # ==========================================================================
-from enum       import Enum
-from warning import *
-import datetime, copy
+import copy
+import datetime
+import json
+import logging
+import logging.config
+from enum import Enum
+
+config = json.load(open("./logger.json"))
+logging.config.dictConfig(config)
+logger = logging.getLogger(__name__)
 
 row = 1
 
@@ -120,7 +127,7 @@ def _print_column_name(ws, metric, column_name):
             ws.Cells(row, col).Value = NodeNo
 
     else:
-        warning(" ERROR from _print_column_name() : Invalid [metric].")
+        logger.error("_print_column_name() : Invalid [metric].")
 
     _fill_color(ws, 19, row, 2, row, col)   # Color table.
     ws.Range(ws.Cells(row, 2), ws.Cells(row, col)).Borders.LineStyle = 1    # Draw border with solid line.
@@ -173,7 +180,7 @@ def _print_row_item(ws, row_name, metric, list_1D, SH_per_link = None, display_m
     # Create 1D-list 'target_list'.
     if metric == Metric.Link:   # Modify list_1D in case of link metric.
         if SH_per_link is None:
-            warning(" ERROR from _print_row_item() : SH_per_link must be given in case of link metric.")
+            logger.error("_print_row_item() : SH_per_link must be given in case of link metric.")
         target_list = copy.deepcopy(list_1D)
         for index in range(len(SH_per_link) - 1, -1, -1):
             for _ in range(SH_per_link[index][1] - 1):

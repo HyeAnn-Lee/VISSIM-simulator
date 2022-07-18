@@ -1,8 +1,14 @@
 # ==========================================================================
 # Author : HyeAnn Lee
 # ==========================================================================
-from warning import *
+import json
+import logging
+import logging.config
 import os
+
+config = json.load(open("./logger.json"))
+logging.config.dictConfig(config)
+logger = logging.getLogger(__name__)
 
 
 def _read_result_att(att_file):
@@ -142,7 +148,7 @@ def extract_from_linkseg(file, lanes_with_SH, Density_overall, DelayRel_overall,
         return string.split(" ")[0]
 
     if not os.path.exists(file):
-        warning(" Error from 'extract_from_linkseg()' : Link Segment Results att file is missing.")
+        logger.error("extract_from_linkseg() : Link Segment Results att file is missing.")
 
     # Read att file to find column names.
     att_file = open(file, "r")
@@ -206,7 +212,7 @@ def extract_from_node(file, No_Node, EmissionCO, EmissionVOC, LOS_hour, Emission
     # > 'EmissionVOC_hour'  : Empty 2D-list.
 
     if not os.path.exists(file):
-        warning(" Error from 'extract_from_node()' : Node Results att file is missing.")
+        logger.error("extract_from_node() : Node Results att file is missing.")
 
     # Change form of each list first.
     EmissionCO. extend([0.0 for _ in range(len(No_Node))])

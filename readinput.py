@@ -2,8 +2,13 @@
 # Author : HyeAnn Lee
 # ==========================================================================
 import json
-from collections    import namedtuple
-from warning     import *
+import logging
+import logging.config
+from collections import namedtuple
+
+config = json.load(open("./logger.json"))
+logging.config.dictConfig(config)
+logger = logging.getLogger(__name__)
 
 class Init:
     def __init__(self):
@@ -47,9 +52,9 @@ def read_json(filename):
 
     # Validation check
     if not isinstance(data.RandomSeed, int):
-        warning(" ERROR : RandomSeed should be an integer... Check json file again.")
+        logger.error("read_json() : RandomSeed should be an integer... Check json file again.")
     if not isinstance(data.TimeInterval, int):
-        warning(" ERROR : TimeInterval should be an positive integer... Check json file again.")
+        logger.error("read_json() : TimeInterval should be an positive integer... Check json file again.")
 
     return data
 
@@ -77,7 +82,7 @@ def read_signal(wb, Signal):
             while isinstance(ws.Cells(row, column).Value, str):
                 value = ws.Cells(row, column).Value
                 if value not in ['R', 'G', 'Y']:
-                    warning(" ERROR : Invalid signal from xlsx... You must use either 'R', 'G' or 'Y'.")
+                    logger.error("_read_signal_seq() : Invalid signal from xlsx... You must use either 'R', 'G' or 'Y'.")
                 sigcon.SigInd[-1].append(value)
                 row += 1
             column += 1
@@ -99,9 +104,9 @@ def read_signal(wb, Signal):
         while ws.Cells(row, column).Value:
             value = ws.Cells(row, column).Value
             if not isinstance(value, float):
-                warning(" ERROR : You should use an integer for signal time...")
+                logger.error("_read_signal_time() : You should use an integer for signal time...")
             if (int(value) != value) or (value < 1):
-                warning(" ERROR : Signal time should be a positive integer...")
+                logger.error("_read_signal_time() : Signal time should be a positive integer...")
 
             accTime += value
             sigcon.BreakAt.append(accTime)
@@ -121,12 +126,12 @@ def read_signal(wb, Signal):
 
     # 'Signal' becomes a 1D-list of SigControl().
     if len(Signal) == 0:
-        warning(" ERROR : Signal file is empty.... Check json file again.")
+        logger.error("read_signal() : Signal file is empty.... Check json file again.")
 
     sim_len = Signal[0].BreakAt[-1]
     for sigcontrol in Signal:
         if sigcontrol.BreakAt[-1] != sim_len:
-            warning(" ERROR : Simulation time of each sheet of excel should be same...")
+            logger.error("read_signal() : Simulation time of each sheet of excel should be same...")
 
     return
 
@@ -174,11 +179,11 @@ def read_vehicleinput(wb, VehicleInput):
 
     # 'VehicleInput' becomes a 1D-list of VehInput().
     if len(VehicleInput) == 0:
-        warning(" ERROR : VehicleInput file is empty.... Check json file again.")
+        logger.error("read_vehicleinput() : VehicleInput file is empty.... Check json file again.")
     num_link = len(VehicleInput[0].VehInfo)
     for vehinput in VehicleInput:
         if len(vehinput.VehInfo) != num_link:
-            warning(" ERROR : The number of links in VehicleInput Excel file is different in some sheets... Check the file again.")
+            logger.error("read_vehicleinput() : The number of links in VehicleInput Excel file is different in some sheets... Check the file again.")
 
     return
 
@@ -200,6 +205,6 @@ def set_accum_break(list_of_SigControl):
     accum_break.sort()
     accum_break.remove(0)
     if not accum_break:
-        warning(" ERROR : Simulation time is zero... Check signal Excel file again.")
+        logger.error("set_accum_break() : Simulation time is zero... Check signal Excel file again.")
 
     return accum_break

@@ -1,20 +1,33 @@
 # ==========================================================================
 # Author : HyeAnn Lee
 # ==========================================================================
-from variable    import *
-from readinput   import *
-from setvissim   import *
-from runsimul    import *
-from cal         import *
-from report      import *
-import win32com.client as com
-import datetime, os, math
+import datetime
+import json
+import logging
+import logging.config
+import math
+import os
+from pathlib import Path
 
+import win32com.client as com
+
+from cal import *
+from readinput import *
+from report import *
+from runsimul import *
+from setvissim import *
+from variable import *
+
+
+Path('./log').mkdir(parents=True, exist_ok=True)
+config = json.load(open("./logger.json"))
+logging.config.dictConfig(config)
+logger = logging.getLogger(__name__)
 
 start_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 # 1. Read Excel
-print("Reading an input file...")
+logger.info("Reading an input file...")
 DataInfo = read_json(os.getcwd() + "\\init.json")
 
 excel = com.Dispatch("Excel.Application")
@@ -31,7 +44,7 @@ convert_signal_to_enum(Signal)
 DataInfo.RandomSeed = set_randomseed(DataInfo.RandomSeed)
 
 ## Connecting the COM Server => Open a new Vissim Window:
-print("Setting Vissim...")
+logger.info("Setting Vissim...")
 Vissim = com.Dispatch("Vissim.Vissim")
 
 ## Load a Vissim Network:
@@ -52,7 +65,7 @@ set_vehicleinput    (Vissim, SimLen, DataInfo.TimeInterval, VehicleInput)
 
 
 # 3. Run Simulation
-print("Running simulation...")
+logger.info("Running simulation...")
 Vissim.Simulation.RunSingleStep()
 
 ## Extract data per signal period
@@ -73,12 +86,12 @@ for hour in range(hour_step):
     extract_from_travtm_per_hour        (Vissim, time_str, AvgSpeed_hour)
 
 ## Close COM server:
-print("Closing Vissim...")
+logger.info("Closing Vissim...")
 Vissim = None
 
 
 # 4. Calculate overall data
-print("Calculating...")
+logger.info("Calculating...")
 SH_per_link = cal_SH_per_link(lanes_with_SH)
 
 cal_occuprate_overall   (OccupRate_hour, OccupRate_overall, SimLen)
@@ -95,7 +108,7 @@ if No_Node:     # If there was any node in Vissim network,
 
 
 # 5. Report
-print("Reporting...")
+logger.info("Reporting...")
 excel = com.Dispatch("Excel.Application")
 excel.Visible = False
 excel.DisplayAlerts = False     # To merge cells
