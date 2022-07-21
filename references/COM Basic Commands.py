@@ -1,55 +1,58 @@
-#==========================================================================
-# Python-Script for PTV Vissim 6+
-# Copyright (C) PTV AG, Jochen Lohmiller
-# All rights reserved.
-# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-# Example of basic syntax - DO NOT MODIFY
-#==========================================================================
+r"""
+=========================================================================
+Python-Script for PTV Vissim 6+
+Copyright (C) PTV AG, Jochen Lohmiller
+All rights reserved.
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+Example of basic syntax - DO NOT MODIFY
+=========================================================================
 
-# This script demonstrates how to use the COM interface in Python.
-# Basic commands for loading a network and layout, reading and setting
-# attributes of network objects, running a simulation and retrieving
-# evaluations are shown. This example is also available for the programming
-# languages VBA, VBS Matlab, C#, C++ and Java.
-#
-# If you start using COM, please see also our COM introduction document:
-# C:\Program Files\PTV Vision\PTV Vissim xx\Doc\Eng\Vissim xx - COM Intro.pdf (xx = version number)
-#
-# For information about the attributes and methods of PTV Vissim objects, see
-# the COM Help, which is located in the PTV Vissim menu: Help > COM Help.
-#
-# Hint: You can easily see all attributes of the PTV Vissim objects in the lists in
-# Vissim. In case your PTV Vissim language is set to English, the name in the
-# headline of the list correspond to the command to access via COM.
-# Example: If you want to access the number of lanes of a link, go to PTV Vissim
-# and see the headline of "Number of lanes" in the list, which is
-# "NumLanes". To access this attribute via COM use:
-# Vissim.Net.Links.ItemByKey(1).AttValue('NumLanes')
-#
-# For adding network objects with COM, please see the example Network Objects Adding
+This script demonstrates how to use the COM interface in Python.
+Basic commands for loading a network and layout, reading and setting
+attributes of network objects, running a simulation and retrieving
+evaluations are shown. This example is also available for the programming
+languages VBA, VBS Matlab, C#, C++ and Java.
 
+If you start using COM, please see also our COM introduction document:
+C:\Program Files\PTV Vision\PTV Vissim xx\Doc\Eng\Vissim xx - COM Intro.pdf (xx = version number)
 
+For information about the attributes and methods of PTV Vissim objects, see
+the COM Help, which is located in the PTV Vissim menu: Help > COM Help.
+
+Hint: You can easily see all attributes of the PTV Vissim objects in the lists in
+Vissim. In case your PTV Vissim language is set to English, the name in the
+headline of the list correspond to the command to access via COM.
+Example: If you want to access the number of lanes of a link, go to PTV Vissim
+and see the headline of "Number of lanes" in the list, which is
+"NumLanes". To access this attribute via COM use:
+Vissim.Net.Links.ItemByKey(1).AttValue('NumLanes')
+
+For adding network objects with COM, please see the example Network Objects Adding
+"""
+
+from __future__ import print_function
+import os
 # COM-Server
 import win32com.client as com
-import os
+
 
 ## Connecting the COM Server => Open a new Vissim Window:
 Vissim = com.gencache.EnsureDispatch("Vissim.Vissim") #
 # Vissim = com.Dispatch("Vissim.Vissim") # once the cache has been generated, its faster to call Dispatch which also creates the connection to Vissim.
 # If you have installed multiple Vissim Versions, you can open a specific Vissim version adding the version number
-# Vissim = com.gencache.EnsureDispatch("Vissim.Vissim.10") # Vissim 10 
-# Vissim = com.gencache.EnsureDispatch("Vissim.Vissim.11") # Vissim 11 
+# Vissim = com.gencache.EnsureDispatch("Vissim.Vissim.10") # Vissim 10
+# Vissim = com.gencache.EnsureDispatch("Vissim.Vissim.22") # Vissim 2022
 
 
 ### for advanced users, with this command you can get all Constants from PTV Vissim with this command (not required for the example)
 ##import sys
 ##Constants = sys.modules[sys.modules[Vissim.__module__].__package__].constants
 
-Path_of_COM_Basic_Commands_network = os.getcwd() #'C:\\Users\\Public\\Documents\\PTV Vision\\PTV Vissim 11\\Examples Training\\COM\\Basic Commands\\'
+Path_of_COM_Basic_Commands_network = 'C:\\Users\\Public\\Documents\\PTV Vision\\PTV Vissim 2022\\Examples Training\\COM\\Basic Commands\\'
 
 ## Load a Vissim Network:
-Filename                = os.path.join(Path_of_COM_Basic_Commands_network, 'COM Basic Commands.inpx')
-flag_read_additionally  = False # you can read network(elements) additionally, in this case set "flag_read_additionally" to true
+Filename               = os.path.join(Path_of_COM_Basic_Commands_network, 'COM Basic Commands.inpx')
+flag_read_additionally = False # you can read network(elements) additionally, in this case set "flag_read_additionally" to true
 Vissim.LoadNet(Filename, flag_read_additionally)
 
 ## Load a Layout:
@@ -66,7 +69,8 @@ Vissim.LoadLayout(Filename)
 # Read Link Name:
 Link_number = 1
 Name_of_Link = Vissim.Net.Links.ItemByKey(Link_number).AttValue('Name')
-print 'Name of Link(',Link_number,'):',Name_of_Link
+Vissim.Log(16384, 'Name of Link(%d): %s' % (Link_number, Name_of_Link))
+print('Name of Link(%d): %s' % (Link_number, Name_of_Link))
 
 # Set Link Name:
 new_Name_of_Link = 'New Link Name'
@@ -92,8 +96,8 @@ Vissim.Net.VehicleInputs.ItemByKey(VI_number).SetAttValue('Volume(1)', new_volum
 # 'Volume(1)' means the first defined time interval
 # Hint: The Volumes of following intervals Volume(i) i = 2...n can only be
 # edited, if continuous is deactivated: (otherwise error: "AttValue failed: Object 2: Attribute Volume (300) is no subject to changes.")
-Vissim.Net.VehicleInputs.ItemByKey(VI_number).SetAttValue('Cont(2)',     False)
-Vissim.Net.VehicleInputs.ItemByKey(VI_number).SetAttValue('Volume(2)',   400  )
+Vissim.Net.VehicleInputs.ItemByKey(VI_number).SetAttValue('Cont(2)', False)
+Vissim.Net.VehicleInputs.ItemByKey(VI_number).SetAttValue('Volume(2)',400)
 
 # Set vehicle composition:
 Veh_composition_number = 1
@@ -108,7 +112,9 @@ Rel_Flows[1].SetAttValue('RelFlow',        0.1) # Changing the relative flow of 
 #========================================================================
 
 def toList(NestedTuple):
-    # function to convert a nested tuple to a nested list
+    """
+    function to convert a nested tuple to a nested list
+    """
     return list(map(toList, NestedTuple)) if isinstance(NestedTuple, (list, tuple)) else NestedTuple
 
 # GetMultiAttValues         Read one attribute of all objects:
@@ -152,9 +158,7 @@ Vissim.Net.Links.SetAllAttValues(Attribute, Cost, True) # setting the 3rd input 
 Random_Seed = 42
 Vissim.Simulation.SetAttValue('RandSeed', Random_Seed)
 
-# To start a simulation you can run a single step:
-Vissim.Simulation.RunSingleStep()
-# Or run the simulation continuous (it stops at breakpoint or end of simulation)
+# Set simulation parameters
 End_of_simulation = 600 # simulation second [s]
 Vissim.Simulation.SetAttValue('SimPeriod', End_of_simulation)
 Sim_break_at = 200 # simulation second [s]
@@ -162,6 +166,9 @@ Vissim.Simulation.SetAttValue('SimBreakAt', Sim_break_at)
 # Set maximum speed:
 Vissim.Simulation.SetAttValue('UseMaxSimSpeed', True)
 # Hint: to change the simulation speed use: Vissim.Simulation.SetAttValue('SimSpeed', 10) # 10 => 10 Sim. sec. / s
+# To start a simulation you can run a single step:
+Vissim.Simulation.RunSingleStep()
+# Or run the simulation continuous (it stops at breakpoint or end of simulation)
 Vissim.Simulation.RunContinuous()
 
 # To stop the simulation:
@@ -181,7 +188,8 @@ Vissim.Simulation.RunContinuous() # start the simulation until SimBreakAt (198s)
 # Get the state of a signal head:
 SH_number = 1 # SH = SignalHead
 State_of_SH = Vissim.Net.SignalHeads.ItemByKey(SH_number).AttValue('SigState') # possible output see COM Help: SignalizationState Enumeration
-print 'Actual state of SignalHead(%d) is: %s' % (SH_number, State_of_SH)
+Vissim.Log(16384, 'Actual state of SignalHead(%d) is: %s' % (SH_number, State_of_SH))
+print('Actual state of SignalHead(%d) is: %s' % (SH_number, State_of_SH))
 
 
 # Set the state of a signal controller:
@@ -213,25 +221,33 @@ SignalGroup.SetAttValue("ContrByCOM", False)
 
 # Method #1: Loop over all Vehicles:
 All_Vehicles = Vissim.Net.Vehicles.GetAll() # get all vehicles in the network at the actual simulation second
-for cnt_Veh in range(len(All_Vehicles)):
-    veh_number      = All_Vehicles[cnt_Veh].AttValue('No')
-    veh_type        = All_Vehicles[cnt_Veh].AttValue('VehType')
-    veh_speed       = All_Vehicles[cnt_Veh].AttValue('Speed')
-    veh_position    = All_Vehicles[cnt_Veh].AttValue('Pos')
-    veh_linklane    = All_Vehicles[cnt_Veh].AttValue('Lane')
-    print '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane)
+Vissim.Log(16384, 'All vehicles by GetAll():')
+print('All vehicles by GetAll():')
+for cur_Veh in All_Vehicles:
+    veh_number      = cur_Veh.AttValue('No')
+    veh_type        = cur_Veh.AttValue('VehType')
+    veh_speed       = cur_Veh.AttValue('Speed')
+    veh_position    = cur_Veh.AttValue('Pos')
+    veh_linklane    = cur_Veh.AttValue('Lane')
+    Vissim.Log(16384, '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane))
+    print('%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane))
 
 # Method #2: Loop over all Vehicles using Object Enumeration
+Vissim.Log(16384, 'All vehicles by object enumeration:')
+print('All vehicles by object enumeration:')
 for Vehicle in Vissim.Net.Vehicles:
     veh_number =    Vehicle.AttValue('No')
     veh_type =      Vehicle.AttValue('VehType')
     veh_speed =     Vehicle.AttValue('Speed')
     veh_position =  Vehicle.AttValue('Pos')
     veh_linklane =  Vehicle.AttValue('Lane')
-    print '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane)
+    Vissim.Log(16384, '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane))
+    print('%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane))
 
 # Method #3: Using the Iterator
 Vehicles_Iterator = Vissim.Net.Vehicles.Iterator
+Vissim.Log(16384, 'All vehicles by iterator:')
+print('All vehicles by iterator:')
 while Vehicles_Iterator.Valid:
     Vehicle = Vehicles_Iterator.Item
     veh_number =    Vehicle.AttValue('No')
@@ -239,7 +255,8 @@ while Vehicles_Iterator.Valid:
     veh_speed =     Vehicle.AttValue('Speed')
     veh_position =  Vehicle.AttValue('Pos')
     veh_linklane =  Vehicle.AttValue('Lane')
-    print '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane)
+    Vissim.Log(16384, '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane))
+    print('%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane))
     Vehicles_Iterator.Next()
 
 # Method #4: Accessing all Attributes directly using "GetMultiAttValues" (fast way if you want the attributes of all vehicles)
@@ -248,14 +265,34 @@ veh_types       = Vissim.Net.Vehicles.GetMultiAttValues('VehType') # Output 1. c
 veh_speeds      = Vissim.Net.Vehicles.GetMultiAttValues('Speed')   # Output 1. column:consecutive number; 2. column: AttValue
 veh_positions   = Vissim.Net.Vehicles.GetMultiAttValues('Pos')     # Output 1. column:consecutive number; 2. column: AttValue
 veh_linklanes   = Vissim.Net.Vehicles.GetMultiAttValues('Lane')    # Output 1. column:consecutive number; 2. column: AttValue
-for cnt in range(len(veh_numbers)):
-    print '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_numbers[cnt][1], veh_types[cnt][1], veh_speeds[cnt][1], veh_positions[cnt][1], veh_linklanes[cnt][1]) # only display the 2nd column
+Vissim.Log(16384, 'All vehicles by GetMultiAttValues:')
+print('All vehicles by GetMultiAttValues:')
+for cnt, vehNum in enumerate(veh_numbers):
+    Vissim.Log(16384, '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (vehNum[1], vehNum[1], vehNum[1], vehNum[1], veh_linklanes[cnt][1])) # only display the 2nd column
+    print('%s  |  %s  |  %.2f  |  %.2f  |  %s' % (vehNum[1], vehNum[1], vehNum[1], vehNum[1], veh_linklanes[cnt][1])) # only display the 2nd column
 
 # Method #5: Accessing all attributes directly using "GetMultipleAttributes" (even more faster)
 all_veh_attributes = Vissim.Net.Vehicles.GetMultipleAttributes(('No', 'VehType', 'Speed', 'Pos', 'Lane'))
-for cnt in range(len(all_veh_attributes)):
-    print '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (all_veh_attributes[cnt][0], all_veh_attributes[cnt][1], all_veh_attributes[cnt][2], all_veh_attributes[cnt][3], all_veh_attributes[cnt][4]) # only display the 2nd column
+Vissim.Log(16384, 'All vehicles by GetMultipleAttributes:')
+print('All vehicles by GetMultipleAttributes:')
+for vahAttr in all_veh_attributes:
+    Vissim.Log(16384, '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (vahAttr[0], vahAttr[1], vahAttr[2], vahAttr[3], vahAttr[4])) # only display the 2nd column
+    print('%s  |  %s  |  %.2f  |  %.2f  |  %s' % (vahAttr[0], vahAttr[1], vahAttr[2], vahAttr[3], vahAttr[4])) # only display the 2nd column
 
+# Method #6: Acessing data for a filtered set of vehicles only
+Vehicles_Filtered_Iterator = Vissim.Net.Vehicles.GetFilteredSet('[SPEED]<25').Iterator
+Vissim.Log(16384, 'Filtered slower vehicles by GetFilteredSet:')
+print('Filtered slower vehicles by GetFilteredSet:')
+while Vehicles_Filtered_Iterator.Valid:
+    Vehicle = Vehicles_Filtered_Iterator.Item
+    veh_number =    Vehicle.AttValue('No')
+    veh_type =      Vehicle.AttValue('VehType')
+    veh_speed =     Vehicle.AttValue('Speed')
+    veh_position =  Vehicle.AttValue('Pos')
+    veh_linklane =  Vehicle.AttValue('Lane')
+    Vissim.Log(16384, '%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane))
+    print('%s  |  %s  |  %.2f  |  %.2f  |  %s' % (veh_number, veh_type, veh_speed, veh_position, veh_linklane))
+    Vehicles_Filtered_Iterator.Next()
 
 ## Operations at one specific vehicle:
 All_Vehicles    = Vissim.Net.Vehicles.GetAll() # get all vehicles in the network at the actual simulation second
@@ -288,7 +325,7 @@ link = 1
 lane = 1
 xcoordinate = 15 # unit according to the user setting in Vissim [m or ft]
 interaction = True # optional boolean
-new_Vehicle = Vissim.Net.Vehicles.AddVehicleAtLinkPosition( vehicle_type, link, lane, xcoordinate, desired_speed, interaction)
+new_Vehicle = Vissim.Net.Vehicles.AddVehicleAtLinkPosition(vehicle_type, link, lane, xcoordinate, desired_speed, interaction)
 # Note: In earlier Vissim releases, the name of the function was: AddVehicleAtLinkCoordinate
 
 # Make Screenshots of the intersection 2D and 3D:
@@ -342,8 +379,8 @@ for simRun in Vissim.Net.SimulationRuns:
     Vissim.Net.SimulationRuns.RemoveSimulationRun(simRun)
 
 # Activate QuickMode:
-Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode",1)
-Vissim.SuspendUpdateGUI(); # stop updating of the complete Vissim workspace (network editor, list, chart and signal time table windows)
+Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode", 1)
+Vissim.SuspendUpdateGUI()   # stop updating of the complete Vissim workspace (network editor, list, chart and signal time table windows)
 # Alternatively, load a layout (*.layx) where dynamic elements (vehicles and pedestrians) are not visible:
 # Vissim.LoadLayout(os.path.join(Path_of_COM_Basic_Commands_network, 'COM Basic Commands - Hide vehicles.layx')) # loading a layout where vehicles are not displayed
 End_of_simulation = 600
@@ -356,8 +393,8 @@ Vissim.Simulation.SetAttValue('UseMaxSimSpeed', True)
 for cnt_Sim in range(3):
     Vissim.Simulation.SetAttValue('RandSeed', cnt_Sim + 1) # Note: RandSeed 0 is not allowed
     Vissim.Simulation.RunContinuous()
-Vissim.ResumeUpdateGUI(True); # allow updating of the complete Vissim workspace (network editor, list, chart and signal time table windows)
-Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode",0) # deactivate QuickMode
+Vissim.ResumeUpdateGUI(True)    # allow updating of the complete Vissim workspace (network editor, list, chart and signal time table windows)
+Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode", 0)    # deactivate QuickMode
 # Vissim.LoadLayout(os.path.join(Path_of_COM_Basic_Commands_network, 'COM Basic Commands.layx')) # loading a layout to display vehicles again
 
 
@@ -365,8 +402,11 @@ Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode",0) # deactivate Qui
 Attributes      = ['Timestamp', 'RandSeed', 'SimEnd']
 number_of_runs  = Vissim.Net.SimulationRuns.Count
 List_Sim_Runs   = Vissim.Net.SimulationRuns.GetMultipleAttributes(Attributes)
+Vissim.Log(16384, 'List of all simulation runs:')
+print('List of all simulation runs:')
 for cnt_S in range(number_of_runs):
-    print '%s | %d | %d ' % (List_Sim_Runs[cnt_S][0], List_Sim_Runs[cnt_S][1], List_Sim_Runs[cnt_S][2])
+    Vissim.Log(16384, '%s | %d | %d ' % (List_Sim_Runs[cnt_S][0], List_Sim_Runs[cnt_S][1], List_Sim_Runs[cnt_S][2]))
+    print('%s | %d | %d ' % (List_Sim_Runs[cnt_S][0], List_Sim_Runs[cnt_S][1], List_Sim_Runs[cnt_S][2]))
 
 
 # Get the results of Vehicle Travel Time Measurements:
@@ -394,7 +434,8 @@ Veh_TT_measurement = Vissim.Net.VehicleTravelTimeMeasurements.ItemByKey(Veh_TT_m
 #   of all vehicle classes (3. input = All)
 TT      = Veh_TT_measurement.AttValue('TravTm(Avg,Avg,All)')
 No_Veh  = Veh_TT_measurement.AttValue('Vehs  (Avg,Avg,All)')
-print 'Average travel time all time intervalls of all simulation of all vehicle classes: %.2f (number of vehicles: %s)' % (TT, No_Veh)
+Vissim.Log(16384, 'Average travel time all time intervalls of all simulation of all vehicle classes: %.2f (number of vehicles: %s)' % (TT, No_Veh))
+print('Average travel time all time intervalls of all simulation of all vehicle classes: %.2f (number of vehicles: %s)' % (TT, No_Veh))
 
 # Example #2:
 # Value of the Current simulation (1. input = Current)
@@ -402,7 +443,8 @@ print 'Average travel time all time intervalls of all simulation of all vehicle 
 #   of vehicle class HGV (3. input = 20)
 TT      = Veh_TT_measurement.AttValue('TravTm(Current,Max,20)')
 No_Veh  = Veh_TT_measurement.AttValue('Vehs  (Current,Max,20)')
-print 'Maximum travel time of all time intervalls of the current simulation of vehicle class HGV: %.2f (number of vehicles: %s)' % (TT, No_Veh)
+Vissim.Log(16384, 'Maximum travel time of all time intervalls of the current simulation of vehicle class HGV: %.2f (number of vehicles: %s)' % (TT, No_Veh))
+print('Maximum travel time of all time intervalls of the current simulation of vehicle class HGV: %.2f (number of vehicles: %s)' % (TT, No_Veh))
 
 # Example #3: Note: A Travel times from 2nd simulation run must be available
 # Value of the 2nd simulation (1. input = 2)
@@ -433,8 +475,10 @@ No_Veh          = DC_measurement.AttValue('Vehs        (Avg,1,All)') # number of
 Speed           = DC_measurement.AttValue('Speed       (Avg,1,All)') # Speed of vehicles
 Acceleration    = DC_measurement.AttValue('Acceleration(Avg,1,All)') # Acceleration of vehicles
 Length          = DC_measurement.AttValue('Length      (Avg,1,All)') # Length of vehicles
-print 'Data Collection #', DC_measurement_number, ': Average values of all Simulations runs of 1st time intervall of all vehicle classes:'
-print '#vehicles: %d; Speed: %.2f; Acceleration: %.2f; Length: %.2f' % (No_Veh, Speed, Acceleration, Length)
+Vissim.Log(16384, 'Data Collection #%d: Average values of all Simulations runs of 1st time intervall of all vehicle classes: ' % (DC_measurement_number))
+print('Data Collection #%d: Average values of all Simulations runs of 1st time intervall of all vehicle classes: ' % (DC_measurement_number))
+Vissim.Log(16384, '#vehicles: %d; Speed: %.2f; Acceleration: %.2f; Length: %.2f' % (No_Veh, Speed, Acceleration, Length))
+print('#vehicles: %d; Speed: %.2f; Acceleration: %.2f; Length: %.2f' % (No_Veh, Speed, Acceleration, Length))
 
 
 # Queue length
@@ -450,7 +494,19 @@ print '#vehicles: %d; Speed: %.2f; Acceleration: %.2f; Length: %.2f' % (No_Veh, 
 # 	of the average of all time intervals (2. input = Avg)
 QC_number = 1
 maxQ = Vissim.Net.QueueCounters.ItemByKey(QC_number).AttValue('QLenMax(Avg, Avg)')
-print 'Average maximum Queue length of all simulations and time intervals of Queue Counter #%d: %.2f' % (QC_number, maxQ)
+Vissim.Log(16384, 'Average maximum Queue length of all simulations and time intervals of Queue Counter #%d: %.2f' % (QC_number, maxQ))
+print('Average maximum Queue length of all simulations and time intervals of Queue Counter #%d: %.2f' % (QC_number, maxQ))
+
+
+# Example #1:
+# There is currently no COM object that represents link evaluation segments as such.
+# As a workaround their values can be accessed via the relations of links. This results
+# in a string that contains the sequence of the chosen values along the sequence of
+# the link evaluation segments.
+Link_number = 1
+volume = Vissim.Net.Links.ItemByKey(Link_number).AttValue('Concatenate:LinkEvalSegs\Volume(Avg, Avg, All)')
+Vissim.Log(16384, 'Average volumes of all simulations and time intervals for all vehicle types of the evaluation segments of the link #%d: %s' % (Link_number, volume))
+print('Average volumes of all simulations and time intervals for all vehicle types of the evaluation segments of the link #%d: %s' % (Link_number, volume))
 
 
 ## ========================================================================
