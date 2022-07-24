@@ -24,6 +24,7 @@ class SigControl:
         self.Name = name    # string
         self.SigInd = []    # 2D-list of characters 'R', 'G' or 'Y'.
         self.BreakAt = []   # 1D-list of int.
+        self.total_simulation = 0    # int
 
 class VehInput:
     def __init__(self, timeint):
@@ -89,7 +90,7 @@ def read_signal(wb, Signal):
 
         return
 
-    def _read_signal_time(sigcon):
+    def _read_signal_time(sigcon, accTime):
         # Input
         #   'sigcon' : SigControl() with self.Name and self.SigInd.
         #
@@ -98,7 +99,6 @@ def read_signal(wb, Signal):
         row = len(sigcon.SigInd[0]) + 1
         column = 3
 
-        accTime = 0
         sigcon.BreakAt.append(accTime)
 
         while ws.Cells(row, column).Value:
@@ -115,22 +115,33 @@ def read_signal(wb, Signal):
                 row += 1
                 column = 3
 
+        sigcon.total_simulation = accTime
+
         return
 
-    for i in range(wb.Worksheets.Count):
-        ws = wb.Worksheets(i+1)
+    num_worksheets = wb.Worksheets.Count
+    num_intersections = num_worksheets - 1
+
+    offsets = []    # signal offset for each intersection
+    ws = wb.Worksheets(0)
+    for i in range(1, num_intersections+1):
+        value = ws.Cells(2, i)
+        offsets.append(value)
+
+    for i in range(1, num_intersections+1):
+        ws = wb.Worksheets(i)
         sigcontrol = SigControl(ws.name)    # SigControl.Name
         _read_signal_seq(sigcontrol)        # SigControl.SigInd
-        _read_signal_time(sigcontrol)       # SigControl.BreakAt
+        _read_signal_time(sigcontrol, sum(offsets[0:i]))       # SigControl.BreakAt
         Signal.append(sigcontrol)
 
     # 'Signal' becomes a 1D-list of SigControl().
     if len(Signal) == 0:
         logger.error("read_signal() : Signal file is empty.... Check json file again.")
 
-    sim_len = Signal[0].BreakAt[-1]
+    sim_len = Signal[0].total_simulation
     for sigcontrol in Signal:
-        if sigcontrol.BreakAt[-1] != sim_len:
+        if sigcontrol.total_simulation != sim_len:
             logger.error("read_signal() : Simulation time of each sheet of excel should be same...")
 
     return
