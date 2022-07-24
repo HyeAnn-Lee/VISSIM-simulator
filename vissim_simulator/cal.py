@@ -28,7 +28,7 @@ def _read_result_att(att_file):
     # Here, 'line' starts with $.
 
     line = line.rstrip()                # Remove the last NULL character.
-    column_name = line.split(':')[1]    # 'column_name' : str containing column names.
+    column_name = line.split(':')[1]    # str containing column names.
 
     return column_name.split(';')       # Return 1D-list of column names.
 
@@ -64,13 +64,13 @@ def cal_SH_per_link(lanes_with_SH):
     # Fill 'sh_per_link'
     for linkNo, *_ in lanes_with_SH:
         if linkNo != link_track:    # If new link is met,
-            sh_per_link.append((link_track, num_SH))    # Append information of previous link.
+            sh_per_link.append((link_track, num_SH))  # Append prev link info.
             link_track = linkNo     # Update to current 'linkNo'.
             num_SH = 1              # Update to current 'num_SH'.
         else:       # If still the same link,
             num_SH += 1     # Increment the number of SH.
 
-    sh_per_link.append((link_track, num_SH))    # Append information of the last link.
+    sh_per_link.append((link_track, num_SH))    # Append the last link info.
 
     return sh_per_link
 
@@ -118,7 +118,8 @@ def cal_qstop_per_meter(QStop_hour, QStop_overall, lanes_with_SH):
     # > 'QStop_overall' : 1D list of non-negative numbers.
     # > 'lanes_with_SH' : 1D list of (int, int, double, double).
     #
-    # Divide all values in 'QStop_hour' and 'QStop_overall' by [length of each link].
+    # Divide all values in 'QStop_hour' and 'QStop_overall'
+    # by [length of each link].
 
     for index_hour in range(len(QStop_hour)):
         for index_lane in range(len(QStop_hour[index_hour])):
@@ -130,7 +131,8 @@ def cal_qstop_per_meter(QStop_hour, QStop_overall, lanes_with_SH):
     return
 
 
-def extract_from_linkseg(file, lanes_with_SH, Density_overall, DelayRel_overall, AvgSpeed_overall):
+def extract_from_linkseg(file, lanes_with_SH, Density_overall,
+                         DelayRel_overall, AvgSpeed_overall):
     # Input
     # > 'file'              : Absolute path of Link Segment Results att file.
     # > 'lanes_with_SH'     : 1D list of (int, int, double, double).
@@ -148,15 +150,16 @@ def extract_from_linkseg(file, lanes_with_SH, Density_overall, DelayRel_overall,
         return string.split(" ")[0]
 
     if not os.path.exists(file):
-        logger.error("extract_from_linkseg() : Link Segment Results att file is missing.")
+        logger.error("extract_from_linkseg():\
+                        Link Segment Results att file is missing.")
 
     # Read att file to find column names.
     att_file = open(file, "r")
     parse = _read_result_att(att_file)  # 'parse' : 1D-list of str.
-    pLinkname   = parse.index('LINKEVALSEGMENT')    # int
-    pDensity    = parse.index('DENSITY(ALL)')       # int
-    pDelayRel   = parse.index('DELAYREL(ALL)')      # int
-    pSpeed      = parse.index('SPEED(ALL)')         # int
+    pLinkname = parse.index('LINKEVALSEGMENT')    # int
+    pDensity = parse.index('DENSITY(ALL)')       # int
+    pDelayRel = parse.index('DELAYREL(ALL)')      # int
+    pSpeed = parse.index('SPEED(ALL)')         # int
 
     # Find links with signal heads.
     links_with_SH = []
@@ -165,27 +168,31 @@ def extract_from_linkseg(file, lanes_with_SH, Density_overall, DelayRel_overall,
             links_with_SH.append(linkNo)
     # 'links_with_SH' : 1D list of int.
 
-    # Read the rest of 'att_file' and fill 'Density_overall', 'DelayRel_overall' and 'AvgSpeed_overall'.
+    # Read the rest of 'att_file' and fill 'Density_overall',
+    # 'DelayRel_overall' and 'AvgSpeed_overall'.
     i = 0
     while i < len(links_with_SH):
         line = att_file.readline().rstrip()
-        parse = line.split(';')     # 'parse' : 1D-list of str containing actual data.
-        if parse[pLinkname].split('-')[0] == str(links_with_SH[i]):     # If 'line' is about links with signal head,
-            density     = _str_2_float(_remove_unit(parse[pDensity]))
-            delayrel    = _str_2_float(_remove_unit(parse[pDelayRel]))
-            speed       = _str_2_float(_remove_unit(parse[pSpeed]))
+        parse = line.split(';')     # 1D-list of str containing actual data.
+
+        # If 'line' is about links with signal head,
+        if parse[pLinkname].split('-')[0] == str(links_with_SH[i]):
+            density = _str_2_float(_remove_unit(parse[pDensity]))
+            delayrel = _str_2_float(_remove_unit(parse[pDelayRel]))
+            speed = _str_2_float(_remove_unit(parse[pSpeed]))
             Density_overall.    append(density)
             DelayRel_overall.   append(delayrel)
             AvgSpeed_overall.   append(speed if speed else -1)
             i += 1
-    # 'Density_overall', 'DelayRel_overall' and 'AvgSpeed_overall' becomes 1D list of floats.
-    # -1 value means that actual data was 0.
+    # 'Density_overall', 'DelayRel_overall' and 'AvgSpeed_overall' becomes
+    # 1D list of floats. -1 value means that actual data was 0.
 
     att_file.close()
     return
 
 
-def prep_extract_from_node(hour_step, LOS_hour, EmissionCO_hour, EmissionVOC_hour):
+def prep_extract_from_node(hour_step, LOS_hour, EmissionCO_hour,
+                           EmissionVOC_hour):
     # Input
     # > 'hour_step'         : int.
     # > 'LOS_hour'          : Empty list.
@@ -196,12 +203,14 @@ def prep_extract_from_node(hour_step, LOS_hour, EmissionCO_hour, EmissionVOC_hou
     EmissionCO_hour.    extend([[] for _ in range(hour_step)])
     EmissionVOC_hour.   extend([[] for _ in range(hour_step)])
 
-    # 'LOS_hour', 'EmissionCO_hour' and 'EmissionVOC_hour' become empty 2D-lists.
+    # 'LOS_hour', 'EmissionCO_hour' and 'EmissionVOC_hour' become
+    # empty 2D-lists.
 
     return
 
 
-def extract_from_node(file, No_Node, EmissionCO, EmissionVOC, LOS_hour, EmissionCO_hour, EmissionVOC_hour):
+def extract_from_node(file, No_Node, EmissionCO, EmissionVOC, LOS_hour,
+                      EmissionCO_hour, EmissionVOC_hour):
     # Input
     # > 'file'          : Absolute path of Node Results att file.
     # > 'No_Node'       : 1D list of int.
@@ -219,43 +228,45 @@ def extract_from_node(file, No_Node, EmissionCO, EmissionVOC, LOS_hour, Emission
     EmissionVOC.extend([0.0 for _ in range(len(No_Node))])
 
     for index_hour in range(len(LOS_hour)):
-        LOS_hour[index_hour]         = ["" for _ in range(len(No_Node))]
-        EmissionCO_hour[index_hour]  = [0.0 for _ in range(len(No_Node))]
+        LOS_hour[index_hour] = ["" for _ in range(len(No_Node))]
+        EmissionCO_hour[index_hour] = [0.0 for _ in range(len(No_Node))]
         EmissionVOC_hour[index_hour] = [0.0 for _ in range(len(No_Node))]
 
     # Read att file to find column names.
     att_file = open(file, "r")
     parse = _read_result_att(att_file)  # 'parse' : 1D-list of str.
-    pTimeInt    = parse.index('TIMEINT')        # int
-    pMovement   = parse.index('MOVEMENT')       # int
-    pLOS        = parse.index('LOS(ALL)')       # int
-    pCO         = parse.index('EMISSIONSCO')    # int
-    pVOC        = parse.index('EMISSIONSVOC')   # int
+    pTimeInt = parse.index('TIMEINT')        # int
+    pMovement = parse.index('MOVEMENT')       # int
+    pLOS = parse.index('LOS(ALL)')       # int
+    pCO = parse.index('EMISSIONSCO')    # int
+    pVOC = parse.index('EMISSIONSVOC')   # int
 
     # Read the rest of 'att_file'.
     collection = []
     line = att_file.readline().rstrip()
     while line:
-        parse = line.split(';')     # 'parse' : 1D-list of str containing actual data.
-        if not '@' in parse[pMovement]:     # If 'line' contains aggregated data of a node,
+        parse = line.split(';')     # 1D-list of str containing actual data.
+        # If 'line' contains aggregated data of a node,
+        if not '@' in parse[pMovement]:
             collection.append(parse)
         line = att_file.readline().rstrip()
     # 'collection' becomes 2D list of str.
 
     att_file.close()
 
-    # Fill 'EmissionCO', 'EmissionVOC', 'LOS_hour', 'EmissionCO_hour' and 'EmissionVOC_hour'
+    # Fill 'EmissionCO', 'EmissionVOC', 'LOS_hour', 'EmissionCO_hour' and
+    # 'EmissionVOC_hour'
     for parse in collection:
-        CO  = _str_2_float(parse[pCO])
+        CO = _str_2_float(parse[pCO])
         VOC = _str_2_float(parse[pVOC])
 
         node_index = No_Node.index(int(parse[pMovement].split(':')[0]))
-        EmissionCO  [node_index] += CO
-        EmissionVOC [node_index] += VOC
+        EmissionCO[node_index] += CO
+        EmissionVOC[node_index] += VOC
 
         hour_index = int(parse[pTimeInt].split('-')[0]) // 3600
-        LOS_hour        [hour_index][node_index] = parse[pLOS][-1]
-        EmissionCO_hour [hour_index][node_index] = CO
+        LOS_hour[hour_index][node_index] = parse[pLOS][-1]
+        EmissionCO_hour[hour_index][node_index] = CO
         EmissionVOC_hour[hour_index][node_index] = VOC
 
     # 'EmissionCO' and 'EmissionVOC' become 1D-list of float.

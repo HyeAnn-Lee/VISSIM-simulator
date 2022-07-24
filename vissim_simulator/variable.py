@@ -2,34 +2,34 @@
 # Author : HyeAnn Lee
 # ==========================================================================
 
-## Read Input
+# Read Input
 Signal = []
 VehicleInput = []
 
-## Vissim
+# Vissim
 lanes_with_SH = list()
 
-## the number of vehicles
+# the number of vehicles
 VehNum_hour = []
 
-## Share
+# Share
 OccupRate_hour = []
 OccupRate_overall = []
 Density_overall = []
 
-## Queue length
+# Queue length
 QStop_hour = []
 QStop_overall = []
 DelayRel_overall = []
 
-## Speed
+# Speed
 AvgSpeed_hour = []
 AvgSpeed_overall = []
 
-## LOS
+# LOS
 LOS_hour = []
 
-## Emission
+# Emission
 EmissionCO = []
 EmissionVOC = []
 EmissionCO_hour = []

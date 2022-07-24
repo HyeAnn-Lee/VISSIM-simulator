@@ -13,7 +13,7 @@ logging.config.dictConfig(config)
 logger = logging.getLogger(__name__)
 
 def _find_vissim_path():
-    path_ptvvision = "C:\Program Files\PTV Vision"
+    path_ptvvision = "C:\\Program Files\\PTV Vision"
     folders = os.listdir(path_ptvvision)
     if len(folders) == 0:
         logger.error(f"{path_ptvvision} does not exist. Is Vissim installed?")
@@ -22,6 +22,7 @@ def _find_vissim_path():
     vissim_path = os.path.join(path_ptvvision, folders[-1])
     logger.info(f"Vissim exe located at {vissim_path}")
     return vissim_path
+
 
 def convert_signal_to_enum(Signal):
     # Input
@@ -44,7 +45,7 @@ def set_randomseed(seed):
     #
     # Set appropirate random seed for Vissim simulation.
 
-    if 0 < seed < (1<<31):
+    if 0 < seed < (1 << 31):
         return seed
 
     return random.randint(1, (1 << 31) - 1)
@@ -68,7 +69,8 @@ def get_travtm_info(Vissim):
     # Output
     # > 'link' : 1D list of (str, str)
 
-    link = Vissim.Net.VehicleTravelTimeMeasurements.GetMultipleAttributes(('StartLink', 'EndLink'))
+    link = Vissim.Net.VehicleTravelTimeMeasurements.\
+            GetMultipleAttributes(('StartLink', 'EndLink'))
 
     # Check for duplicates
     tempset = set(link)
@@ -106,15 +108,15 @@ def find_incoming_lane(Vissim, lanes_with_SH):
         lanes_with_SH.append((linkNo, laneNo, SH.AttValue('Pos'), length))
         SH_Iter.Next()
 
-    # 'lanes_with_SH' becomes a 1D list of
-    #               (int, int, double, double) = (linkNo of SH, laneNo of SH, pos of SH, length of link)
+    # 'lanes_with_SH' becomes a 1D list of (int, int, double, double)
+    # = (linkNo of SH, laneNo of SH, pos of SH, length of link)
     lanes_with_SH.sort()
 
     return
 
 
 def set_Vissim(Vissim, simLen, seed):
-    ## Evaluation
+    # Evaluation
     Vissim.Evaluation.SetAttValue('KeepPrevResults', 1)
 
     Vissim.Evaluation.SetAttValue('DataCollCollectData',    True)
@@ -129,7 +131,7 @@ def set_Vissim(Vissim, simLen, seed):
     Vissim.Evaluation.SetAttValue('QueuesInterval',     3600)
     Vissim.Evaluation.SetAttValue('VehTravTmsInterval', 3600)
 
-    ## Net
+    # Net
     Vissim.Net.NetPara.SetAttValue('UnitAccel', 0)          # m/s^2
     Vissim.Net.NetPara.SetAttValue('UnitLenLong', 0)        # km
     Vissim.Net.NetPara.SetAttValue('UnitLenShort', 0)       # m
@@ -137,14 +139,17 @@ def set_Vissim(Vissim, simLen, seed):
     Vissim.Net.NetPara.SetAttValue('UnitSpeed', 0)          # km/h
     Vissim.Net.NetPara.SetAttValue('UnitSpeedSmall', 0)     # m/s
 
-    ## Simulation
-    Vissim.Simulation.SetAttValue('SimPeriod', simLen)      # Set simulation period
-    Vissim.Simulation.SetAttValue('RandSeed', seed)         # Choose Random Seed
+    # Simulation
+    Vissim.Simulation.SetAttValue('SimPeriod', simLen)  # Set simulation period
+    Vissim.Simulation.SetAttValue('RandSeed', seed)  # Choose Random Seed
     Vissim.Simulation.SetAttValue('UseMaxSimSpeed', True)   # Set Maximum Speed
 
-    ## Others
-    Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode", 1)    # Activate QuickMode
-    Vissim.SuspendUpdateGUI()   # Stop updating Vissim workspace (network editor, list and chart)
+    # Others
+
+    # Activate QuickMode
+    Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode", 1)
+    # Stop updating Vissim workspace (network editor, list and chart)
+    Vissim.SuspendUpdateGUI()
 
     return
 
@@ -194,8 +199,11 @@ def set_queue_counter(Vissim, lanes_with_SH):
             if (not QC) or (abs(QC[-1] - Pos) < 10):
                 QC.append(Pos)
             else:   # abs(QC[-1] - pos) >= 10
-                _add_QC(Vissim.Net.Links.ItemByKey(linkNo)) # Set QueueCounter for previous 'Pos'es.
-                QC = [Pos]                                  # Reset 'QC' to current 'Pos'.
+                # Set QueueCounter for previous 'Pos'es.
+                _add_QC(Vissim.Net.Links.ItemByKey(linkNo))
+
+                # Reset 'QC' to current 'Pos'.
+                QC = [Pos]
 
         _add_QC(Vissim.Net.Links.ItemByKey(linkNo))
 
@@ -216,7 +224,8 @@ def set_data_collection(Vissim, lanes_with_SH):
     # Remove existing DC measurements
     All_DCMs = Vissim.Net.DataCollectionMeasurements.GetAll()
     for DCM in All_DCMs:
-        Vissim.Net.DataCollectionMeasurements.RemoveDataCollectionMeasurement(DCM)
+        Vissim.Net.DataCollectionMeasurements.\
+            RemoveDataCollectionMeasurement(DCM)
 
     # Set New DC and DC measurements
     for linkNo, laneNo, pos, _ in lanes_with_SH:
@@ -224,11 +233,13 @@ def set_data_collection(Vissim, lanes_with_SH):
 
         # data collection point
         lane = Vissim.Net.Links.ItemByKey(linkNo).Lanes.ItemByKey(laneNo)
-        Vissim.Net.DataCollectionPoints.AddDataCollectionPoint(key, lane, pos - 1.6)
+        Vissim.Net.DataCollectionPoints.AddDataCollectionPoint(
+                                            key, lane, pos - 1.6)
 
         # data collection measurement
         Vissim.Net.DataCollectionMeasurements.AddDataCollectionMeasurement(key)
-        Vissim.Net.DataCollectionMeasurements.ItemByKey(key).SetAttValue('DataCollectionPoints', key)
+        Vissim.Net.DataCollectionMeasurements.\
+            ItemByKey(key).SetAttValue('DataCollectionPoints', key)
 
     return
 
@@ -249,7 +260,9 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
         while list_filename:
             filename = list_filename.pop()
             modeltype, modelname = filename.split(' - ', 1)
-            if ((modeltype == "Bike") and (modelname[:-4] in ["Motorbike 01", "Scooter 01"])) or (modeltype in ["LtTruck", "SUV"]):
+            if ((modeltype == "Bike")
+                and (modelname[:-4] in ["Motorbike 01", "Scooter 01"]))\
+               or (modeltype in ["LtTruck", "SUV"]):
                 # Check if the model already exists
                 Model_name = Vissim.Net.Models2D3D.GetMultiAttValues('Name')
                 exist = False
@@ -267,8 +280,10 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
                     modelkey += 1
 
                 # Add model
-                Vissim.Net.Models2D3D.AddModel2D3D(modelkey, [v3d_file_path + filename])
-                Vissim.Net.Models2D3D.ItemByKey(modelkey).SetAttValue("Name", filename[:-4])
+                Vissim.Net.Models2D3D.\
+                    AddModel2D3D(modelkey, [v3d_file_path + filename])
+                Vissim.Net.Models2D3D.\
+                    ItemByKey(modelkey).SetAttValue("Name", filename[:-4])
 
         return
 
@@ -288,10 +303,13 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
             elif name.startswith('Bike'):
                 Bikes.append(no)
 
-        newdistr = [(1, carSUVs, "CarSUV"), (2, LtTrucks, "LtTruck"), (3, Bikes, "Bike")]
+        newdistr = [(1, carSUVs, "CarSUV"), (2, LtTrucks, "LtTruck"),
+                    (3, Bikes, "Bike")]
         for distrKey, distrEl, distrName in newdistr:
-            Vissim.Net.Model2D3DDistributions.AddModel2D3DDistribution(distrKey, distrEl)
-            Vissim.Net.Model2D3DDistributions.ItemByKey(distrKey).SetAttValue("Name", distrName)
+            Vissim.Net.Model2D3DDistributions.\
+                AddModel2D3DDistribution(distrKey, distrEl)
+            Vissim.Net.Model2D3DDistributions.\
+                ItemByKey(distrKey).SetAttValue("Name", distrName)
 
         return
 
@@ -312,10 +330,14 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
                 if ele_name == dist_name:
                     return ele_no
 
-        dist_attrs = Vissim.Net.Model2D3DDistributions.GetMultipleAttributes(('No', 'Name'))
-        vehicle_types = [("Vehicle", _find_dist_key('CarSUV')),     ("Small Truck", _find_dist_key('LtTruck')),
-                         ("Large Truck", _find_dist_key('HGV')),    ("Special Car", _find_dist_key('HGV')),
-                         ("Bus", _find_dist_key('Bus')),            ("Motor Cycle", _find_dist_key('Bike'))]
+        dist_attrs = Vissim.Net.\
+            Model2D3DDistributions.GetMultipleAttributes(('No', 'Name'))
+        vehicle_types = [("Vehicle", _find_dist_key('CarSUV')),
+                         ("Small Truck", _find_dist_key('LtTruck')),
+                         ("Large Truck", _find_dist_key('HGV')),
+                         ("Special Car", _find_dist_key('HGV')),
+                         ("Bus", _find_dist_key('Bus')),
+                         ("Motor Cycle", _find_dist_key('Bike'))]
 
         # New types are assigned successively from key 1.
         key_vehicletype = 1
@@ -323,7 +345,9 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
             Vissim.Net.VehicleTypes.AddVehicleType(key_vehicletype)
             VT = Vissim.Net.VehicleTypes.ItemByKey(key_vehicletype)
             VT.SetAttValue("Name", name_type)
-            VT.SetAttValue("Model2D3DDistr", Vissim.Net.Model2D3DDistributions.ItemByKey(key_dist))
+            VT.SetAttValue(
+                "Model2D3DDistr",
+                Vissim.Net.Model2D3DDistributions.ItemByKey(key_dist))
             key_vehicletype += 1
 
         return
@@ -334,9 +358,11 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
 
         TI_VI = Vissim.Net.TimeIntervalSets.ItemByKey(1).TimeInts
         for TIkey in range(1, timestep):
-            TI_VI.AddTimeInterval(TIkey + 1)    # Here, interval is automatically set to 15min (= 900sec).
+            # Here, interval is automatically set to 15min (= 900sec).
+            TI_VI.AddTimeInterval(TIkey + 1)
             if TimeInterval != 900:
-                TI_VI.ItemByKey(TIkey + 1).SetAttValue('Start', TimeInterval * TIkey)
+                TI_VI.ItemByKey(TIkey + 1).SetAttValue('Start',
+                                                       TimeInterval * TIkey)
 
         return
 
@@ -347,17 +373,21 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
 
         # Add new DesSpeedDistribution if necessary.
         if not Vissim.Net.DesSpeedDistributions.ItemKeyExists(DesSpeed):
-            Vissim.Net.DesSpeedDistributions.AddDesSpeedDistribution(DesSpeed, ())
-            SDDP_getall = Vissim.Net.DesSpeedDistributions.ItemByKey(DesSpeed).SpeedDistrDatPts.GetAll()
+            Vissim.Net.DesSpeedDistributions.\
+                AddDesSpeedDistribution(DesSpeed, ())
+            SDDP_getall = Vissim.Net.DesSpeedDistributions.\
+                ItemByKey(DesSpeed).SpeedDistrDatPts.GetAll()
             SDDP_getall[0].SetAttValue('X', DesSpeed - 2)
             SDDP_getall[1].SetAttValue('X', DesSpeed + 8)
 
         # Add new vehicle composition.
         Vissim.Net.VehicleCompositions.AddVehicleComposition(vehcompkey, ())
-        # Then, first vehicle type (here, [Vehicle]) is automatically added to relative flow table with DesSpeedDistr 5.
+        # Then, first vehicle type (here, [Vehicle]) is automatically added to
+        # relative flow table with DesSpeedDistr 5.
         VC = Vissim.Net.VehicleCompositions.ItemByKey(vehcompkey)
 
-        # Add all vehicle types (except above first one) to relative flow table.
+        # Add all vehicle types (except above first one) to relative flow
+        # table.
         for veh_type in range(1, num_vehtype):
             vt = Vissim.Net.VehicleTypes.ItemByKey(veh_type + 1)
             dsd = Vissim.Net.DesSpeedDistributions.ItemByKey(DesSpeed)
@@ -369,21 +399,25 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
 
         # Set appropriate RelFlows.
         for i in range(num_vehtype-1, -1, -1):
-            volume = VehicleInput[index_timeint].VehInfo[index_link].VehComp[i] # float
+            # volume: float
+            volume = VehicleInput[index_timeint].VehInfo[index_link].VehComp[i]
             if volume == 0:
-                VC.VehCompRelFlows.RemoveVehicleCompositionRelativeFlow(Rel_flows[i])
+                VC.VehCompRelFlows.\
+                    RemoveVehicleCompositionRelativeFlow(Rel_flows[i])
             else:
                 Rel_flows[i].SetAttValue('RelFlow', volume)
 
         return
 
     num_timeint = len(VehicleInput)
-    num_link    = len(VehicleInput[0].VehInfo)
+    num_link = len(VehicleInput[0].VehInfo)
     num_vehtype = len(VehicleInput[0].VehInfo[0].VehComp)
 
     # Validation check
     if math.ceil(SimLen / TimeInterval) != num_timeint:
-        logger.error("set_vehicleinput() : The number of sheets in VehicleInput Excel file is incorrect... Check the file again.")
+        logger.error("set_vehicleinput():\
+            The number of sheets in VehicleInput Excel file is incorrect...\
+            Check the file again.")
 
     # Remove existing VI
     All_VIs = Vissim.Net.VehicleInputs.GetAll()
@@ -400,7 +434,8 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
     for index_link in range(num_link):   # for each link
         # Add vehicle input to Vissim network
         linkno = VehicleInput[0].VehInfo[index_link].LinkNo
-        Vissim.Net.VehicleInputs.AddVehicleInput(linkno, Vissim.Net.Links.ItemByKey(linkno))
+        Vissim.Net.VehicleInputs.\
+            AddVehicleInput(linkno, Vissim.Net.Links.ItemByKey(linkno))
 
         VI = Vissim.Net.VehicleInputs.ItemByKey(linkno)
         for index_timeint in range(num_timeint):    # for each time interval
@@ -409,11 +444,15 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
             # Set volume
             if index_timeint != 0:
                 VI.SetAttValue('Cont' + timeint_str, False)
-            VI.SetAttValue('Volume' + timeint_str, sum(VehicleInput[index_timeint].VehInfo[index_link].VehComp))
+            VI.SetAttValue(
+                'Volume' + timeint_str,
+                sum(VehicleInput[index_timeint].VehInfo[index_link].VehComp))
 
             # Set vehcomp
             key = Vissim.Net.VehicleCompositions.Count + 1
             _set_vehcomp(key, 50)
-            VI.SetAttValue('VehComp' + timeint_str, Vissim.Net.VehicleCompositions.ItemByKey(key))
+            VI.SetAttValue(
+                'VehComp' + timeint_str,
+                Vissim.Net.VehicleCompositions.ItemByKey(key))
 
     return

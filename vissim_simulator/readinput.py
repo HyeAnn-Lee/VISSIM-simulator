@@ -12,12 +12,13 @@ logger = logging.getLogger(__name__)
 
 class Init:
     def __init__(self):
-        self.Signal = ""        # string : absolute path of signal Excel file.
-        self.VehicleInput = ""  # string : absolute path of vehicle input Excel file.
-        self.VissimInput = ""   # string : absolute path of Vissim inpx file.
+        self.Signal = ""        # string: absolute path of signal Excel file.
+        self.VehicleInput = ""  # string: abs path of vehicle input Excel file.
+        self.VissimInput = ""   # string: absolute path of Vissim inpx file.
         self.RandomSeed = -1    # int
-        self.TimeInterval = 900 # int
+        self.TimeInterval = 900     # int
         self.Comment = ""       # string
+
 
 class SigControl:
     def __init__(self, name):
@@ -25,6 +26,7 @@ class SigControl:
         self.SigInd = []    # 2D-list of characters 'R', 'G' or 'Y'.
         self.BreakAt = []   # 1D-list of int.
         self.total_simulation = 0    # int
+
 
 class VehInput:
     def __init__(self, timeint):
@@ -39,17 +41,17 @@ def read_json(filename):
     # Output
     # > 'data' : Init().
 
-    with open(filename, "r", encoding = 'UTF8') as init_json:
+    with open(filename, "r", encoding='UTF8') as init_json:
         init_python = json.load(init_json)
 
     data = Init()
-    data.Signal         = init_python['TargetFile']['Signal']
-    data.VehicleInput   = init_python['TargetFile']['VehicleInput']
-    data.VissimInput    = init_python['TargetFile']['VissimInput']
+    data.Signal = init_python['TargetFile']['Signal']
+    data.VehicleInput = init_python['TargetFile']['VehicleInput']
+    data.VissimInput = init_python['TargetFile']['VissimInput']
 
-    data.RandomSeed     = init_python['Settings']['RandomSeed']
-    data.TimeInterval   = init_python['Settings']['TimeInterval of VehicleInput']
-    data.Comment        = init_python['Settings']['Comment']
+    data.RandomSeed = init_python['Settings']['RandomSeed']
+    data.TimeInterval = init_python['Settings']['TimeInterval of VehicleInput']
+    data.Comment = init_python['Settings']['Comment']
 
     # Validation check
     if not isinstance(data.RandomSeed, int):
@@ -74,8 +76,8 @@ def read_signal(wb, Signal):
         column = 3
 
         while ws.Cells(1, column).Value:
-            # Each element of 'SigInd' will contain signal information ('R', 'G', 'Y')
-            # from all "signal group"s in one signal step.
+            # Each element of 'SigInd' will contain signal information
+            # ('R', 'G', 'Y') from all "signal group"s in one signal step.
 
             sigcon.SigInd.append([])
 
@@ -132,7 +134,7 @@ def read_signal(wb, Signal):
         ws = wb.Worksheets(i+1)
         sigcontrol = SigControl(ws.name)    # SigControl.Name
         _read_signal_seq(sigcontrol)        # SigControl.SigInd
-        _read_signal_time(sigcontrol, sum(offsets[0:i]))       # SigControl.BreakAt
+        _read_signal_time(sigcontrol, sum(offsets[0:i]))  # SigControl.BreakAt
         Signal.append(sigcontrol)
 
     # 'Signal' becomes a 1D-list of SigControl().
