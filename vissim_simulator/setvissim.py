@@ -12,6 +12,16 @@ config = json.load(open("./logger.json"))
 logging.config.dictConfig(config)
 logger = logging.getLogger(__name__)
 
+def _find_vissim_path():
+    path_ptvvision = "C:\Program Files\PTV Vision"
+    folders = os.listdir(path_ptvvision)
+    if len(folders) == 0:
+        logger.error(f"{path_ptvvision} does not exist. Is Vissim installed?")
+    if len(folders) > 1:
+        logger.warning(f"Multiple folders in {path_ptvvision}. Are multiple versions of Vissim installed? Program will proceeds with {folders[-1]} anyway.")
+    vissim_path = os.path.join(path_ptvvision, folders[-1])
+    logger.info(f"Vissim exe located at {vissim_path}")
+    return vissim_path
 
 def convert_signal_to_enum(Signal):
     # Input
@@ -232,7 +242,7 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
     def _change_models():
         # Add motorbike, SUV, small truck models.
 
-        v3d_file_path = "C:\\Program Files\\PTV Vision\\PTV Vissim 11\\Exe\\3DModels\\Vehicles\\Road\\"
+        v3d_file_path = _find_vissim_path() + "\\3DModels\\Vehicles\\Road\\"
         list_filename = os.listdir(v3d_file_path)
         typeNkey = {'LtTruck': 51, 'Bike': 61, 'SUV': 71}
 
