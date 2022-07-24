@@ -18,7 +18,6 @@ from runsimul import *
 from setvissim import *
 from variable import *
 
-
 Path('./log').mkdir(parents=True, exist_ok=True)
 config = json.load(open("./logger.json"))
 logging.config.dictConfig(config)
