@@ -34,6 +34,9 @@ class VehInput:
         self.VehInfo = []       # elements will be namedtuple 'LinkInfo'.
 
 
+NUM_DISCRIPTION_LINE = 3
+
+
 def read_json(filename):
     # Input
     # > 'filename' : Absolute path of json file.
@@ -76,7 +79,7 @@ def read_signal(wb, Signal):
         sg_nums = []
 
         # Read signal group No.
-        row = 1
+        row = NUM_DISCRIPTION_LINE + 1
         while isinstance(ws.Cells(row, 3).Value, str):
             sg_no = ws.Cells(row, 2).Value
             sg_nums.append(int(sg_no))
@@ -85,14 +88,14 @@ def read_signal(wb, Signal):
 
         # Read and store signal information.
         column = 3
-        while ws.Cells(1, column).Value:
+        while ws.Cells(NUM_DISCRIPTION_LINE + 1, column).Value:
             # Each element of 'SigInd' will contain signal information
             # ('R', 'G', 'Y') from all "signal group"s in one signal step.
 
             sigind = [None] * len(sg_nums)
 
             for row in range(1, len(sg_nums)+1):
-                value = ws.Cells(row, column).Value
+                value = ws.Cells(NUM_DISCRIPTION_LINE + row, column).Value
                 if value not in ['R', 'G', 'Y']:
                     logger.error("_read_signal_seq() : Invalid signal from xlsx... You must use either 'R', 'G' or 'Y'.")
                 sigind[sg_nums[row-1]-1] = value
@@ -107,7 +110,7 @@ def read_signal(wb, Signal):
         #
         # Read signal information of '현시 시간 배분' table.
 
-        row = len(sigcon.SigInd[0]) + 1
+        row = NUM_DISCRIPTION_LINE + len(sigcon.SigInd[0]) + 1
         column = 3
 
         sigcon.BreakAt.append(accTime)
@@ -136,7 +139,7 @@ def read_signal(wb, Signal):
     offsets = []    # signal offset for each intersection
     ws = wb.Worksheets(1)
     for i in range(1, num_intersections+1):
-        value = int(ws.Cells(2, i+1).Value)
+        value = int(ws.Cells(NUM_DISCRIPTION_LINE + 2, i+1).Value)
         offsets.append(value)
 
     for i in range(1, num_intersections+1):
@@ -169,10 +172,10 @@ def read_vehicleinput(wb, VehicleInput):
         # > 'vehin' : VehInput() with self.TimeInt.
 
         num_vehcomp = 0
-        while ws.Cells(2, num_vehcomp + 2).Value:
+        while ws.Cells(NUM_DISCRIPTION_LINE + 2, num_vehcomp + 2).Value:
             num_vehcomp += 1
 
-        row = 3
+        row = NUM_DISCRIPTION_LINE + 3
         while ws.Cells(row, 1).Value:
             # linkinfo.LinkNo   : int
             LinkNo = int(ws.Cells(row, 1).Value)
