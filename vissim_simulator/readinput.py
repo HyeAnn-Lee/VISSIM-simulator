@@ -73,21 +73,30 @@ def read_signal(wb, Signal):
         #
         # Read signal information of '현시' table.
 
-        column = 3
+        sg_nums = []
 
+        # Read signal group No.
+        row = 1
+        while isinstance(ws.Cells(row, 3).Value, str):
+            sg_no = ws.Cells(row, 2).Value
+            sg_nums.append(int(sg_no))
+            row += 1
+        sg_nums = tuple(sg_nums)
+
+        # Read and store signal information.
+        column = 3
         while ws.Cells(1, column).Value:
             # Each element of 'SigInd' will contain signal information
             # ('R', 'G', 'Y') from all "signal group"s in one signal step.
 
-            sigcon.SigInd.append([])
+            sigind = [None] * len(sg_nums)
 
-            row = 1
-            while isinstance(ws.Cells(row, column).Value, str):
+            for row in range(1, len(sg_nums)+1):
                 value = ws.Cells(row, column).Value
                 if value not in ['R', 'G', 'Y']:
                     logger.error("_read_signal_seq() : Invalid signal from xlsx... You must use either 'R', 'G' or 'Y'.")
-                sigcon.SigInd[-1].append(value)
-                row += 1
+                sigind[sg_nums[row-1]-1] = value
+            sigcon.SigInd.append(sigind)
             column += 1
 
         return
