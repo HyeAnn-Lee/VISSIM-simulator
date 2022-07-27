@@ -253,7 +253,8 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
     def _change_models():
         # Add motorbike, SUV, small truck models.
 
-        v3d_file_path = _find_vissim_path() + "\\3DModels\\Vehicles\\Road\\"
+        v3d_file_path = os.path.join(_find_vissim_path(),
+                                     "3DModels\\Vehicles\\Road")
         list_filename = os.listdir(v3d_file_path)
         typeNkey = {'LtTruck': 51, 'Bike': 61, 'SUV': 71}
 
