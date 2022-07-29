@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def _find_vissim_path():
     path_ptvvision = "C:\\Program Files\\PTV Vision"
     folders = os.listdir(path_ptvvision)
-    if len(folders) == 0:
+    if not folders:
         logger.error(f"{path_ptvvision} does not exist. Is Vissim installed?")
     if len(folders) > 1:
         logger.warning(f"Multiple folders in {path_ptvvision}. Are multiple versions of Vissim installed? Program will proceeds with {folders[-1]} anyway.")

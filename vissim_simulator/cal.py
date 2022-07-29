@@ -164,7 +164,7 @@ def extract_from_linkseg(file, lanes_with_SH, Density_overall,
     # Find links with signal heads.
     links_with_SH = []
     for linkNo, *_ in lanes_with_SH:
-        if not linkNo in links_with_SH:
+        if linkNo not in links_with_SH:
             links_with_SH.append(linkNo)
     # 'links_with_SH' : 1D list of int.
 
@@ -247,7 +247,7 @@ def extract_from_node(file, No_Node, EmissionCO, EmissionVOC, LOS_hour,
     while line:
         parse = line.split(';')     # 1D-list of str containing actual data.
         # If 'line' contains aggregated data of a node,
-        if not '@' in parse[pMovement]:
+        if '@' not in parse[pMovement]:
             collection.append(parse)
         line = att_file.readline().rstrip()
     # 'collection' becomes 2D list of str.

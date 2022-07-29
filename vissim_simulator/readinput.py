@@ -150,7 +150,7 @@ def read_signal(wb, Signal):
         Signal.append(sigcontrol)
 
     # 'Signal' becomes a 1D-list of SigControl().
-    if len(Signal) == 0:
+    if not Signal:
         logger.error("read_signal() : Signal file is empty.... Check json file again.")
 
     sim_len = Signal[0].total_simulation
@@ -203,7 +203,7 @@ def read_vehicleinput(wb, VehicleInput):
         VehicleInput.append(vehinput)                   # add vehinput
 
     # 'VehicleInput' becomes a 1D-list of VehInput().
-    if len(VehicleInput) == 0:
+    if not VehicleInput:
         logger.error("read_vehicleinput() : VehicleInput file is empty.... Check json file again.")
     num_link = len(VehicleInput[0].VehInfo)
     for vehinput in VehicleInput:
