@@ -133,21 +133,33 @@ def read_signal(wb, Signal):
 
         return
 
-    num_worksheets = wb.Worksheets.Count
-    num_intersections = num_worksheets - 1
+    try:
+        num_worksheets = wb.Worksheets.Count
+        num_intersections = num_worksheets - 1
 
-    offsets = []    # signal offset for each intersection
-    ws = wb.Worksheets(1)
-    for i in range(1, num_intersections+1):
-        value = int(ws.Cells(NUM_DISCRIPTION_LINE + 2, i+1).Value)
-        offsets.append(value)
+        offsets = []    # signal offset for each intersection
+        ws = wb.Worksheets(1)
+        for i in range(1, num_intersections+1):
+            value = int(ws.Cells(NUM_DISCRIPTION_LINE + 2, i+1).Value)
+            offsets.append(value)
 
-    for i in range(1, num_intersections+1):
-        ws = wb.Worksheets(i+1)
-        sigcontrol = SigControl(ws.name)    # SigControl.Name
-        _read_signal_seq(sigcontrol)        # SigControl.SigInd
-        _read_signal_time(sigcontrol, sum(offsets[0:i]))  # SigControl.BreakAt
-        Signal.append(sigcontrol)
+        for i in range(1, num_intersections+1):
+            ws = wb.Worksheets(i+1)
+
+            # SigControl.Name
+            sigcontrol = SigControl(ws.name)
+            # SigControl.SigInd
+            _read_signal_seq(sigcontrol)
+            # SigControl.BreakAt
+            _read_signal_time(sigcontrol, sum(offsets[0:i]))
+
+            Signal.append(sigcontrol)
+
+    except Exception as e:
+        print(e)
+
+    finally:
+        ws = None
 
     # 'Signal' becomes a 1D-list of SigControl().
     if not Signal:
@@ -197,10 +209,23 @@ def read_vehicleinput(wb, VehicleInput):
 
     LinkInfo = namedtuple('namedtuple_linkinfo', ['LinkNo', 'VehComp'])
 
-    for i in range(wb.Worksheets.Count):
-        vehinput = VehInput(i + 1)                      # set VehInput.TimeInt
-        _set_vehinfo(wb.WorkSheets(i + 1), vehinput)    # set VehInput.VehInfo
-        VehicleInput.append(vehinput)                   # add vehinput
+    try:
+        for i in range(wb.Worksheets.Count):
+            # set VehInput.TimeInt
+            vehinput = VehInput(i + 1)
+
+            # set VehInput.VehInfo
+            ws = wb.WorkSheets(i + 1)
+            _set_vehinfo(ws, vehinput)
+
+            # add vehinput
+            VehicleInput.append(vehinput)
+
+    except Exception as e:
+        print(e)
+
+    finally:
+        ws = None
 
     # 'VehicleInput' becomes a 1D-list of VehInput().
     if not VehicleInput:

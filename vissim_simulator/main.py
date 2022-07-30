@@ -29,12 +29,23 @@ logger.info("Reading an input file...")
 DataInfo = readinput.\
             read_json(Path().absolute()/"vissim_simulator/resources/init.json")
 
-excel = com.Dispatch("Excel.Application")
-excel.Visible = False
-excel.DisplayAlerts = False
-readinput.read_signal(excel.Workbooks.Open(DataInfo.Signal), Signal)
-readinput.read_vehicleinput(excel.Workbooks.Open(DataInfo.VehicleInput), VehicleInput)
-excel.Quit()
+try:
+    excel = com.Dispatch("Excel.Application")
+    excel.Visible = False
+    excel.DisplayAlerts = False
+    wb1 = excel.Workbooks.Open(DataInfo.Signal)
+    readinput.read_signal(wb1, Signal)
+    wb2 = excel.Workbooks.Open(DataInfo.VehicleInput)
+    readinput.read_vehicleinput(wb2, VehicleInput)
+    excel.Quit()
+
+except Exception as e:
+    print(e)
+
+finally:
+    wb1 = None
+    wb2 = None
+    excel = None
 
 BreakAt = readinput.set_accum_break(Signal)
 
@@ -110,17 +121,26 @@ if No_Node:     # If there was any node in Vissim network,
 
 # 5. Report
 logger.info("Reporting...")
-excel = com.Dispatch("Excel.Application")
-excel.Visible = False
-excel.DisplayAlerts = False     # To merge cells
-wb = excel.Workbooks.Add()
-ws = wb.Worksheets("Sheet1")
+try:
+    excel = com.Dispatch("Excel.Application")
+    excel.Visible = False
+    excel.DisplayAlerts = False     # To merge cells
+    wb = excel.Workbooks.Add()
+    ws = wb.Worksheets("Sheet1")
 
-report.print_simul_info(ws, DataInfo, SimLen)
-report.print_explanation(ws)
-report.print_overall(ws, lanes_with_SH, SH_per_link, No_Node, DelayRel_overall, Density_overall, AvgSpeed_overall, QStop_overall, OccupRate_overall, EmissionCO, EmissionVOC)
-report.print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, No_Node, VehNum_hour, QStop_hour, OccupRate_hour, AvgSpeed_hour, LOS_hour, EmissionCO_hour, EmissionVOC_hour)
+    report.print_simul_info(ws, DataInfo, SimLen)
+    report.print_explanation(ws)
+    report.print_overall(ws, lanes_with_SH, SH_per_link, No_Node, DelayRel_overall, Density_overall, AvgSpeed_overall, QStop_overall, OccupRate_overall, EmissionCO, EmissionVOC)
+    report.print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, No_Node, VehNum_hour, QStop_hour, OccupRate_hour, AvgSpeed_hour, LOS_hour, EmissionCO_hour, EmissionVOC_hour)
 
-ws.Columns(2).AutoFit()
-wb.SaveAs(str(Path().absolute()/f'output_{start_time}.xlsx'))
-excel.Quit()
+    ws.Columns(2).AutoFit()
+    wb.SaveAs(str(Path().absolute()/f'output_{start_time}.xlsx'))
+    excel.Quit()
+
+except Exception as e:
+    print(e)
+
+finally:
+    ws = None
+    wb = None
+    excel = None
