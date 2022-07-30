@@ -6,7 +6,6 @@ import json
 import logging
 import logging.config
 import math
-import os
 from pathlib import Path
 
 import win32com.client as com
@@ -27,8 +26,8 @@ start_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 # 1. Read Excel
 logger.info("Reading an input file...")
-DataInfo = readinput.read_json(
-            os.path.join(os.getcwd(), "vissim_simulator/resources/init.json"))
+DataInfo = readinput.\
+            read_json(Path().absolute()/"vissim_simulator/resources/init.json")
 
 excel = com.Dispatch("Excel.Application")
 excel.Visible = False
@@ -98,12 +97,14 @@ cal.cal_occuprate_overall(OccupRate_hour, OccupRate_overall, SimLen)
 cal.cal_qstop_overall(QStop_hour, QStop_overall)
 cal.cal_qstop_per_meter(QStop_hour, QStop_overall, lanes_with_SH)
 
-linkseg_result = DataInfo.VissimInput[:-5] + '_Link Segment Results_001.att'
+network_filename = Path(DataInfo.VissimInput).stem  # without extension (.inpx)
+
+linkseg_result = f'{network_filename}_Link Segment Results_001.att'
 cal.extract_from_linkseg(linkseg_result, lanes_with_SH, Density_overall, DelayRel_overall, AvgSpeed_overall)
 
 cal.prep_extract_from_node(hour_step, LOS_hour, EmissionCO_hour, EmissionVOC_hour)
 if No_Node:     # If there was any node in Vissim network,
-    node_result = DataInfo.VissimInput[:-5] + '_Node Results_001.att'
+    node_result = f'{network_filename}_Node Results_001.att'
     cal.extract_from_node(node_result, No_Node, EmissionCO, EmissionVOC, LOS_hour, EmissionCO_hour, EmissionVOC_hour)
 
 
@@ -121,5 +122,5 @@ report.print_overall(ws, lanes_with_SH, SH_per_link, No_Node, DelayRel_overall, 
 report.print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, No_Node, VehNum_hour, QStop_hour, OccupRate_hour, AvgSpeed_hour, LOS_hour, EmissionCO_hour, EmissionVOC_hour)
 
 ws.Columns(2).AutoFit()
-wb.SaveAs(os.getcwd() + '\\output_' + start_time + '.xlsx')
+wb.SaveAs(str(Path().absolute()/f'output_{start_time}.xlsx'))
 excel.Quit()

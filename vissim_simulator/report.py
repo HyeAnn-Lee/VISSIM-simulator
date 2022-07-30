@@ -114,7 +114,7 @@ def _print_column_name(ws, metric, column_name):
         #                             double(LinkLen))
         for linkNo, laneNo, *_ in column_name:
             col += 1
-            ws.Cells(row, col).Value = "'" + str(linkNo) + " - " + str(laneNo)
+            ws.Cells(row, col).Value = f"'{linkNo} - {laneNo}"
 
     elif metric == Metric.Link:
         # 'column_name' : 1D list of (int(LinkNo), int(NumSH))
@@ -128,7 +128,7 @@ def _print_column_name(ws, metric, column_name):
         ws.Cells(row, col).Value = "Section"    # Overwrite.
         for startlink, endlink in column_name:
             col += 1
-            ws.Cells(row, col).Value = startlink + " to " + endlink
+            ws.Cells(row, col).Value = f'{startlink} to {endlink}'
 
     elif metric == Metric.Node:
         # 'column_name' : 1D list of int(NodeNo)
@@ -201,7 +201,8 @@ def _print_row_item(ws, row_name, metric, list_1D, SH_per_link=None,
         target_list = copy.deepcopy(list_1D)
         for index in range(len(SH_per_link) - 1, -1, -1):
             for _ in range(SH_per_link[index][1] - 1):
-                target_list.insert(index + 1, 99999999 if display_min
+                target_list.insert(index + 1,
+                                   99999999 if display_min
                                    else -99999999)  # Insert dummy value.
     else:   # lane, TT, Node
         target_list = list_1D
@@ -383,11 +384,11 @@ def print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, No_Node, VehNum_hour,
         inter_row = row
         hour = 0
         for hour in range(len(list_2D)):
-            row_name = str(hour) + "~" + str(hour + 1) + " hour"
+            row_name = f'{hour}~{hour+1} hour'
             _print_row_item(ws, row_name, metric, list_2D[hour], column_name)
 
         # The last one has to be overwritten.
-        ws.Cells(row - 1, 2).Value = str(hour) + "~END"
+        ws.Cells(row - 1, 2).Value = f'{hour}~END'
 
         _fill_color(ws, 19, inter_row, 2, row - 1, 2)   # Color table.
         _print_text(ws, "*")    # Print new line.

@@ -74,13 +74,13 @@ def extract_from_datacollection_per_hour(Vissim, time_str, VehNum_hour,
     VehNum_hour.append([])
     OccupRate_hour.append([])
 
-    subattr = '(Current,' + time_str + ',All)'
+    subattr = f'(Current,{time_str},All)'
     DC_Iter = Vissim.Net.DataCollectionMeasurements.Iterator
     while DC_Iter.Valid:
         DC = DC_Iter.Item
-        VehNum_hour[-1].append(_get_AttValue_num(DC, 'Vehs' + subattr))
-        OccupRate_hour[-1].\
-            append(_get_AttValue_num(DC, 'OccupRate' + subattr) * 100)
+        VehNum_hour[-1].append(_get_AttValue_num(DC, f'Vehs{subattr}'))
+        OccupRate_hour[-1].append(
+                            _get_AttValue_num(DC, f'OccupRate{subattr}') * 100)
         DC_Iter.Next()
 
     # Now, last element of 'VehNum_hour' and 'OccupRate_hour' is list of
@@ -100,8 +100,8 @@ def extract_from_queue_per_hour(Vissim, time_str, QStop_hour):
     QC_Iter = Vissim.Net.QueueCounters.Iterator
     while QC_Iter.Valid:
         QC = QC_Iter.Item
-        QStop_hour[-1].\
-            append(_get_AttValue_num(QC, 'QStops(Current,' + time_str + ')'))
+        QStop_hour[-1].append(_get_AttValue_num(QC,
+                                                f'QStops(Current,{time_str})'))
         QC_Iter.Next()
 
     # Now, last elements of 'QStop_hour' is a list of non-negative numbers.
@@ -125,7 +125,7 @@ def extract_from_travtm_per_hour(Vissim, time_str, AvgSpeed_hour):
     while TT_Iter.Valid:
         TT = TT_Iter.Item
         Dist = _get_AttValue_num(TT, 'Dist')
-        TravTm = _get_AttValue_num(TT, 'TravTm(Current,' + time_str + ',All)')
+        TravTm = _get_AttValue_num(TT, f'TravTm(Current,{time_str},All)')
         if TravTm == 0:
             AvgSpeed_hour[-1].append(-1)
         else:

@@ -4,7 +4,7 @@
 import json
 import logging
 import logging.config
-import os
+from pathlib import Path
 
 config = json.load(open("./logger.json"))
 logging.config.dictConfig(config)
@@ -149,7 +149,7 @@ def extract_from_linkseg(file, lanes_with_SH, Density_overall,
 
         return string.split(" ")[0]
 
-    if not os.path.exists(file):
+    if not Path(file).exists():
         logger.error("extract_from_linkseg():\
                         Link Segment Results att file is missing.")
 
@@ -220,7 +220,7 @@ def extract_from_node(file, No_Node, EmissionCO, EmissionVOC, LOS_hour,
     # > 'EmissionCO_hour'   : Empty 2D-list.
     # > 'EmissionVOC_hour'  : Empty 2D-list.
 
-    if not os.path.exists(file):
+    if not Path(file).exists():
         logger.error("extract_from_node() : Node Results att file is missing.")
 
     # Change form of each list first.

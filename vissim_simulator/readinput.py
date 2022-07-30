@@ -39,12 +39,12 @@ NUM_DISCRIPTION_LINE = 3
 
 def read_json(filename):
     # Input
-    # > 'filename' : Absolute path of json file.
+    # > 'filename' : Absolute path of json file. <class 'pathlib.WindowsPath'>.
     #
     # Output
     # > 'data' : Init().
 
-    with open(filename, "r", encoding='UTF8') as init_json:
+    with filename.open('r', encoding='UTF8') as init_json:
         init_python = json.load(init_json)
 
     data = Init()

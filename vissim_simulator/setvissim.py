@@ -5,21 +5,21 @@ import json
 import logging
 import logging.config
 import math
-import os
 import random
+from pathlib import Path
 
 config = json.load(open("./logger.json"))
 logging.config.dictConfig(config)
 logger = logging.getLogger(__name__)
 
 def _find_vissim_path():
-    path_ptvvision = "C:\\Program Files\\PTV Vision"
-    folders = os.listdir(path_ptvvision)
-    if not folders:
+    path_ptvvision = Path("C:\\Program Files\\PTV Vision")
+    directories = [x for x in path_ptvvision.iterdir() if x.is_dir()]
+    if not directories:
         logger.error(f"{path_ptvvision} does not exist. Is Vissim installed?")
-    if len(folders) > 1:
-        logger.warning(f"Multiple folders in {path_ptvvision}. Are multiple versions of Vissim installed? Program will proceeds with {folders[-1]} anyway.")
-    vissim_path = os.path.join(path_ptvvision, folders[-1])
+    if len(directories) > 1:
+        logger.warning(f"Multiple directories in {path_ptvvision}. Are multiple versions of Vissim installed? Program will proceeds with {directories[-1]} anyway.")
+    vissim_path = path_ptvvision/directories[-1]/'Exe'
     logger.info(f"Vissim exe located at {vissim_path}")
     return vissim_path
 
@@ -57,7 +57,7 @@ def check_sig_file(Vissim):
     SC_Iter = Vissim.Net.SignalControllers.Iterator
     while SC_Iter.Valid:
         sig_file = SC_Iter.Item.AttValue('SupplyFile2')
-        if (sig_file != "") and (not os.path.exists(sig_file)):
+        if (sig_file != "") and not Path(sig_file).exists():
             logger.error("check_sig_file() : At least one of sig files is missing.")
 
         SC_Iter.Next()
@@ -253,22 +253,20 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
     def _change_models():
         # Add motorbike, SUV, small truck models.
 
-        v3d_file_path = os.path.join(_find_vissim_path(),
-                                     "3DModels\\Vehicles\\Road")
-        list_filename = os.listdir(v3d_file_path)
+        v3d_path = _find_vissim_path()/'3DModels'/'Vehicles'/'Road'
+        v3d_files = [e for e in v3d_path.iterdir() if e.is_file()]
         typeNkey = {'LtTruck': 51, 'Bike': 61, 'SUV': 71}
 
-        while list_filename:
-            filename = list_filename.pop()
-            modeltype, modelname = filename.split(' - ', 1)
-            if ((modeltype == "Bike")
-                and (modelname[:-4] in ["Motorbike 01", "Scooter 01"]))\
+        for v3d_file in v3d_files:
+            v3d_filename = v3d_file.stem
+            modeltype, _modelname = v3d_filename.split(' - ', 1)
+            if (v3d_filename in ['Bike - Motorbike 01', 'Bike - Scooter 01'])\
                or (modeltype in ["LtTruck", "SUV"]):
                 # Check if the model already exists
                 Model_name = Vissim.Net.Models2D3D.GetMultiAttValues('Name')
                 exist = False
                 for _, model in Model_name:
-                    if filename[:-4] in model:
+                    if v3d_filename in model:
                         exist = True
                         break
                 if exist:
@@ -281,10 +279,9 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
                     modelkey += 1
 
                 # Add model
+                Vissim.Net.Models2D3D.AddModel2D3D(modelkey, [str(v3d_file)])
                 Vissim.Net.Models2D3D.\
-                    AddModel2D3D(modelkey, [v3d_file_path + filename])
-                Vissim.Net.Models2D3D.\
-                    ItemByKey(modelkey).SetAttValue("Name", filename[:-4])
+                    ItemByKey(modelkey).SetAttValue("Name", v3d_filename)
 
         return
 
@@ -440,20 +437,20 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
 
         VI = Vissim.Net.VehicleInputs.ItemByKey(linkno)
         for index_timeint in range(num_timeint):    # for each time interval
-            timeint_str = '(' + str(index_timeint + 1) + ')'
+            timeint_str = f'({index_timeint + 1})'
 
             # Set volume
             if index_timeint != 0:
-                VI.SetAttValue('Cont' + timeint_str, False)
+                VI.SetAttValue(f'Cont{timeint_str}', False)
             VI.SetAttValue(
-                'Volume' + timeint_str,
+                f'Volume{timeint_str}',
                 sum(VehicleInput[index_timeint].VehInfo[index_link].VehComp))
 
             # Set vehcomp
             key = Vissim.Net.VehicleCompositions.Count + 1
             _set_vehcomp(key, 50)
             VI.SetAttValue(
-                'VehComp' + timeint_str,
+                f'VehComp{timeint_str}',
                 Vissim.Net.VehicleCompositions.ItemByKey(key))
 
     return
