@@ -255,6 +255,7 @@ def set_accum_break(list_of_SigControl):
     accum_break.sort()
     accum_break.remove(0)
     if not accum_break:
-        logger.error("set_accum_break() : Simulation time is zero... Check signal Excel file again.")
+        logger.error("set_accum_break() : Simulation time is zero...\
+                                        Check signal Excel file again.")
 
     return accum_break
