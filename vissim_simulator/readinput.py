@@ -151,7 +151,7 @@ def read_signal(wb, Signal):
             # SigControl.SigInd
             _read_signal_seq(sigcontrol)
             # SigControl.BreakAt
-            _read_signal_time(sigcontrol, sum(offsets[0:i]))
+            _read_signal_time(sigcontrol, sum(offsets[:i]))
 
             Signal.append(sigcontrol)
 

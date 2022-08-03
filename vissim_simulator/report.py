@@ -305,14 +305,14 @@ def print_explanation(ws):
     return
 
 
-def print_overall(ws, lanes_with_SH, SH_per_link, No_Node, DelayRel_overall,
+def print_overall(ws, lanes_with_SH, SH_per_link, node_nums, DelayRel_overall,
                   Density_overall, AvgSpeed_overall, QStop_overall,
                   OccupRate_overall, EmissionCO, EmissionVOC):
     # Input
     # > 'ws'            : Excel worksheet.
     # > 'lanes_with_SH' : 1D list of (int(LinkNo), int(LaneNo), double(PosSH)).
     # > 'SH_per_link'   : 1D list of (int(LinkNo), int(NumSH)).
-    # > 'No_Node'       : 1D list of int(NodeNo) or empty list.
+    # > 'node_nums'       : 1D list of int(NodeNo) or empty list.
     # > 'DelayRel_overall'  : 1D list of floats.
     # > 'Density_overall'   : 1D list of floats.
     # > 'AvgSpeed_overall'  : 1D list of floats.
@@ -336,9 +336,9 @@ def print_overall(ws, lanes_with_SH, SH_per_link, No_Node, DelayRel_overall,
     _fill_color(ws, 19, start_row + 2, 2, row - 1, 2)
     _print_text(ws, "*")
 
-    if No_Node:
+    if node_nums:
         mid_row = row
-        _print_column_name(ws, Metric.Node, No_Node)
+        _print_column_name(ws, Metric.Node, node_nums)
 
         _print_row_item(ws, "Emissions CO",     Metric.Node, EmissionCO)
         _print_row_item(ws, "Emissions VOC",    Metric.Node, EmissionVOC)
@@ -351,7 +351,7 @@ def print_overall(ws, lanes_with_SH, SH_per_link, No_Node, DelayRel_overall,
     return
 
 
-def print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, No_Node, VehNum_hour,
+def print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, node_nums, VehNum_hour,
                QStop_hour, OccupRate_hour, AvgSpeed_hour, LOS_hour,
                EmissionCO_hour, EmissionVOC_hour):
     # Input
@@ -361,7 +361,7 @@ def print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, No_Node, VehNum_hour,
     # > 'SH_per_link'   : 1D list of (int(LinkNo), int(NumSH)).
     # > 'Link_TT'       : 1D list of (str(StartLink), str(EndLink)) or empty
     #                     list.
-    # > 'No_Node'       : 1D list of int(NodeNo) or empty list.
+    # > 'node_nums'       : 1D list of int(NodeNo) or empty list.
     # > 'VehNum_hour'       : 2D-list of non-negative numbers.
     # > 'QStop_hour'        : 2D list of non-negative numbers.
     # > 'OccupRate_hour'    : 2D-list of non-negative numbers.
@@ -383,9 +383,9 @@ def print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, No_Node, VehNum_hour,
         # Print table contents.
         inter_row = row
         hour = 0
-        for hour in range(len(list_2D)):
+        for hour, list_1d in enumerate(list_2D):
             row_name = f'{hour}~{hour+1} hour'
-            _print_row_item(ws, row_name, metric, list_2D[hour], column_name)
+            _print_row_item(ws, row_name, metric, list_1d, column_name)
 
         # The last one has to be overwritten.
         ws.Cells(row - 1, 2).Value = f'{hour}~END'
@@ -406,10 +406,10 @@ def print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, No_Node, VehNum_hour,
     if Link_TT:
         _print_Metric("* Speed", Metric.TT, Link_TT, AvgSpeed_hour)
 
-    if No_Node:
-        _print_Metric("* LOS", Metric.Node, No_Node, LOS_hour)
-        _print_Metric("* Emissions CO", Metric.Node, No_Node, EmissionCO_hour)
-        _print_Metric("* Emissions VOC", Metric.Node, No_Node,
+    if node_nums:
+        _print_Metric("* LOS", Metric.Node, node_nums, LOS_hour)
+        _print_Metric("* Emissions CO", Metric.Node, node_nums, EmissionCO_hour)
+        _print_Metric("* Emissions VOC", Metric.Node, node_nums,
                       EmissionVOC_hour)
 
     _fill_color(ws, 36, start_row, 1, row - 2, 1)

@@ -80,14 +80,12 @@ def get_travtm_info(Vissim):
     return link
 
 
-def get_node_info(Vissim):
+def get_all_node(Vissim):
     # Output
     # > 'nodeno' : 1D list of int
 
-    nodeno = []
-    node_numbers = Vissim.Net.Nodes.GetMultiAttValues('No')
-    for _, No in node_numbers:
-        nodeno.append(No)
+    net_nodes_no = Vissim.Net.Nodes.GetMultiAttValues('No')
+    nodeno = [node_num for _, node_num in net_nodes_no]
 
     return nodeno
 

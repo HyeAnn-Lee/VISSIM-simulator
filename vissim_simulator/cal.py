@@ -104,8 +104,8 @@ def cal_qstop_overall(QStop_hour, QStop_overall):
     # Fill 'QStop_overall'.
     for index_QC in range(len(QStop_hour[0])):
         qstop = 0
-        for index_hour in range(len(QStop_hour)):
-            qstop += QStop_hour[index_hour][index_QC]
+        for temp_1dlist in QStop_hour:
+            qstop += temp_1dlist[index_QC]
         QStop_overall.append(qstop)
 
     # 'QStop_overall' becomes 1D list of non-negative numbers.
@@ -209,11 +209,11 @@ def prep_extract_from_node(hour_step, LOS_hour, EmissionCO_hour,
     return
 
 
-def extract_from_node(file, No_Node, EmissionCO, EmissionVOC, LOS_hour,
+def extract_from_node(file, node_nums, EmissionCO, EmissionVOC, LOS_hour,
                       EmissionCO_hour, EmissionVOC_hour):
     # Input
     # > 'file'          : Absolute path of Node Results att file.
-    # > 'No_Node'       : 1D list of int.
+    # > 'node_nums'       : 1D list of int.
     # > 'EmissionCO'    : Empty list.
     # > 'EmissionVOC'   : Empty list.
     # > 'LOS_hour'          : Empty 2D-list.
@@ -223,14 +223,16 @@ def extract_from_node(file, No_Node, EmissionCO, EmissionVOC, LOS_hour,
     if not Path(file).exists():
         logger.error("extract_from_node() : Node Results att file is missing.")
 
+    num_nodes = len(node_nums)
+
     # Change form of each list first.
-    EmissionCO. extend([0.0 for _ in range(len(No_Node))])
-    EmissionVOC.extend([0.0 for _ in range(len(No_Node))])
+    EmissionCO. extend([0.0 for _ in range(num_nodes)])
+    EmissionVOC.extend([0.0 for _ in range(num_nodes)])
 
     for index_hour in range(len(LOS_hour)):
-        LOS_hour[index_hour] = ["" for _ in range(len(No_Node))]
-        EmissionCO_hour[index_hour] = [0.0 for _ in range(len(No_Node))]
-        EmissionVOC_hour[index_hour] = [0.0 for _ in range(len(No_Node))]
+        LOS_hour[index_hour] = ["" for _ in range(num_nodes)]
+        EmissionCO_hour[index_hour] = [0.0 for _ in range(num_nodes)]
+        EmissionVOC_hour[index_hour] = [0.0 for _ in range(num_nodes)]
 
     # Read att file to find column names.
     att_file = open(file, "r")
@@ -260,7 +262,7 @@ def extract_from_node(file, No_Node, EmissionCO, EmissionVOC, LOS_hour,
         CO = _str_2_float(parse[pCO])
         VOC = _str_2_float(parse[pVOC])
 
-        node_index = No_Node.index(int(parse[pMovement].split(':')[0]))
+        node_index = node_nums.index(int(parse[pMovement].split(':')[0]))
         EmissionCO[node_index] += CO
         EmissionVOC[node_index] += VOC
 
