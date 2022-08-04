@@ -4,6 +4,7 @@
 import json
 import logging
 import logging.config
+import sys
 from collections import namedtuple
 
 config = json.load(open("./logger.json"))
@@ -104,32 +105,34 @@ def read_signal(wb, Signal):
 
         return
 
-    def _read_signal_time(sigcon, accTime):
+    def _read_signal_time(sigcon, offset):
         # Input
         #   'sigcon' : SigControl() with self.Name and self.SigInd.
+        #   'offset' : offset of each intersection
         #
         # Read signal information of '현시 시간 배분' table.
 
         row = NUM_DISCRIPTION_LINE + len(sigcon.SigInd[0]) + 1
         column = 3
 
+        accTime = offset
         sigcon.BreakAt.append(accTime)
 
         while ws.Cells(row, column).Value:
-            value = ws.Cells(row, column).Value
-            if not isinstance(value, float):
+            time = ws.Cells(row, column).Value
+            if not isinstance(time, float):
                 logger.error("_read_signal_time() : You should use an integer for signal time...")
-            if (int(value) != value) or (value < 1):
+            if (int(time) != time) or (time < 1):
                 logger.error("_read_signal_time() : Signal time should be a positive integer...")
 
-            accTime += value
+            accTime += time
             sigcon.BreakAt.append(accTime)
             column += 1
             if column - 3 == len(sigcon.SigInd):
                 row += 1
                 column = 3
 
-        sigcon.total_simulation = accTime
+        sigcon.total_simulation = int(accTime)
 
         return
 
@@ -151,12 +154,12 @@ def read_signal(wb, Signal):
             # SigControl.SigInd
             _read_signal_seq(sigcontrol)
             # SigControl.BreakAt
-            _read_signal_time(sigcontrol, sum(offsets[:i]))
+            _read_signal_time(sigcontrol, offsets[i-1])
 
             Signal.append(sigcontrol)
 
     except Exception as e:
-        print(e)
+        print('\t', sys.exc_info()[0], e)
 
     finally:
         ws = None
