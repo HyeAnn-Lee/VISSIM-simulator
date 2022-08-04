@@ -140,11 +140,12 @@ def read_signal(wb, Signal):
         num_worksheets = wb.Worksheets.Count
         num_intersections = num_worksheets - 1
 
-        offsets = []    # signal offset for each intersection
+        offset_info = dict()    # signal offset of each intersection
         ws = wb.Worksheets(1)
-        for i in range(1, num_intersections+1):
-            value = int(ws.Cells(NUM_DISCRIPTION_LINE + 2, i+1).Value)
-            offsets.append(value)
+        for col in range(2, num_intersections+2):
+            name = ws.Cells(NUM_DISCRIPTION_LINE + 1, col).Value
+            offset = int(ws.Cells(NUM_DISCRIPTION_LINE + 2, col).Value)
+            offset_info[name] = offset
 
         for i in range(1, num_intersections+1):
             ws = wb.Worksheets(i+1)
@@ -154,7 +155,7 @@ def read_signal(wb, Signal):
             # SigControl.SigInd
             _read_signal_seq(sigcontrol)
             # SigControl.BreakAt
-            _read_signal_time(sigcontrol, offsets[i-1])
+            _read_signal_time(sigcontrol, offset_info[ws.name])
 
             Signal.append(sigcontrol)
 
