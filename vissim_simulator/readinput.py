@@ -115,6 +115,7 @@ def read_signal(wb, Signal):
         row = NUM_DISCRIPTION_LINE + len(sigcon.SigInd[0]) + 1
         column = 3
 
+        period = 0
         accTime = offset
         sigcon.BreakAt.append(accTime)
 
@@ -125,10 +126,18 @@ def read_signal(wb, Signal):
             if (int(time) != time) or (time < 1):
                 logger.error("_read_signal_time() : Signal time should be a positive integer...")
 
+            period += time
             accTime += time
             sigcon.BreakAt.append(accTime)
             column += 1
             if column - 3 == len(sigcon.SigInd):
+                if offset > period:
+                    logger.error(
+                        "at _read_signal_time():\t"
+                        + f"Signal offset ({offset} sec) is larger than "
+                        + f"signal period ({int(period)} sec). "
+                        + f"Check '{sigcon.Name}' sheet again.")
+                period = 0
                 row += 1
                 column = 3
 
