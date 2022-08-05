@@ -75,14 +75,14 @@ def cal_SH_per_link(lanes_with_SH):
     return sh_per_link
 
 
-def cal_occuprate_overall(OccupRate_hour, OccupRate_overall, simLen):
+def cal_occuprate_overall(OccupRate_hour, OccupRate_overall, sim_len):
     # Input
     # > 'OccupRate_hour'    : 2D list of non-negative numbers.
     # > 'OccupRate_overall' : Empty list.
-    # > 'SimLen' : int.
+    # > 'sim_len' : int.
 
     # Calculate how many minutes the last time interval is.
-    last_min = (simLen - 1) % 3600 + 1
+    last_min = (sim_len - 1) % 3600 + 1
 
     # Fill 'OccupRate_overall'.
     for index_DC in range(len(OccupRate_hour[0])):
@@ -90,7 +90,7 @@ def cal_occuprate_overall(OccupRate_hour, OccupRate_overall, simLen):
         for index_hour in range(len(OccupRate_hour)-1):
             OccupRate += 3600 * OccupRate_hour[index_hour][index_DC]
         OccupRate += last_min * OccupRate_hour[-1][index_DC]
-        OccupRate_overall.append(OccupRate / simLen)
+        OccupRate_overall.append(OccupRate / sim_len)
 
     # 'OccupRate_overall' becomes 1D list of non-negative numbers.
     return

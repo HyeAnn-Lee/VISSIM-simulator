@@ -17,8 +17,22 @@ class Init:
         self.VehicleInput = ""  # string: abs path of vehicle input Excel file.
         self.VissimInput = ""   # string: absolute path of Vissim inpx file.
         self.RandomSeed = -1    # int
+        self.simulation_time = 600  # int
         self.TimeInterval = 900     # int
         self.Comment = ""       # string
+
+    def check_validation(self):
+        if not isinstance(self.RandomSeed, int):
+            logger.error(
+                "RandomSeed should be an integer. Check json file again.")
+        if not isinstance(self.simulation_time, int):
+            logger.error(
+                "Simulation period should be an positive integer.",
+                "Check json file again.")
+        if not isinstance(self.TimeInterval, int):
+            logger.error(
+                "TimeInterval of VehicleInput should be an positive integer.",
+                "Check json file again.")
 
 
 class SigControl:
@@ -46,30 +60,28 @@ def read_json(filename):
     # > 'data' : Init().
 
     with filename.open('r', encoding='UTF8') as init_json:
-        init_python = json.load(init_json)
+        data_dict = json.load(init_json)
 
     data = Init()
-    data.Signal = init_python['TargetFile']['Signal']
-    data.VehicleInput = init_python['TargetFile']['VehicleInput']
-    data.VissimInput = init_python['TargetFile']['VissimInput']
+    data.Signal = data_dict['TargetFile']['Signal']
+    data.VehicleInput = data_dict['TargetFile']['VehicleInput']
+    data.VissimInput = data_dict['TargetFile']['VissimInput']
 
-    data.RandomSeed = init_python['Settings']['RandomSeed']
-    data.TimeInterval = init_python['Settings']['TimeInterval of VehicleInput']
-    data.Comment = init_python['Settings']['Comment']
+    data.RandomSeed = data_dict['Settings']['RandomSeed']
+    data.simulation_time = data_dict['Settings']['Simulation period [sec]']
+    data.TimeInterval = data_dict['Settings']['TimeInterval of VehicleInput']
+    data.Comment = data_dict['Settings']['Comment']
 
-    # Validation check
-    if not isinstance(data.RandomSeed, int):
-        logger.error("read_json() : RandomSeed should be an integer... Check json file again.")
-    if not isinstance(data.TimeInterval, int):
-        logger.error("read_json() : TimeInterval should be an positive integer... Check json file again.")
+    data.check_validation()
 
     return data
 
 
-def read_signal(wb, Signal):
+def read_signal(wb, Signal, sim_len):
     # Input
     # > 'wb' : Excel file with contents of signal information.
     # > 'Signal' : Empty list.
+    # > 'sim_len' : simulation period in seconds.
 
     def _read_signal_seq(sigcon):
         # Input
@@ -178,10 +190,22 @@ def read_signal(wb, Signal):
     if not Signal:
         logger.error("read_signal() : Signal file is empty.... Check json file again.")
 
-    sim_len = Signal[0].total_simulation
     for sigcontrol in Signal:
-        if sigcontrol.total_simulation != sim_len:
-            logger.error("read_signal() : Simulation time of each sheet of excel should be same...")
+        if sigcontrol.total_simulation > sim_len:
+            sigcontrol.BreakAt = [i for i in sigcontrol.BreakAt if i < sim_len]
+            sigcontrol.BreakAt.append(sim_len)
+            sigcontrol.total_simulation = sim_len
+            logger.info(
+                sigcontrol.Name
+                + f'\tsimulation time changed to: {sim_len} [s]')
+
+        if sigcontrol.total_simulation < sim_len:
+            logger.error(
+                "read_signal():"
+                + "\tSimulation time of each sheet should be"
+                + f"at least {sim_len} [s]."
+                + f"(Currently {sigcontrol.total_simulation} [s])"
+                + f"Check '{sigcontrol.Name}' sheet again.")
 
     return
 
@@ -271,4 +295,4 @@ def set_accum_break(list_of_SigControl):
         logger.error("set_accum_break() : Simulation time is zero...\
                                         Check signal Excel file again.")
 
-    return accum_break
+    return accum_break[:-1]

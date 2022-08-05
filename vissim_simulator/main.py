@@ -34,7 +34,7 @@ try:
     excel.Visible = False
     excel.DisplayAlerts = False
     wb1 = excel.Workbooks.Open(DataInfo.Signal)
-    readinput.read_signal(wb1, Signal)
+    readinput.read_signal(wb1, Signal, DataInfo.simulation_time)
     wb2 = excel.Workbooks.Open(DataInfo.VehicleInput)
     readinput.read_vehicleinput(wb2, VehicleInput)
     excel.Quit()
@@ -66,12 +66,11 @@ Link_TT = setvissim.get_travtm_info(Vissim)
 node_nums = setvissim.get_all_node(Vissim)
 setvissim.find_incoming_lane(Vissim, lanes_with_SH)
 
-SimLen = BreakAt.pop(-1)
-setvissim.set_Vissim(Vissim, SimLen, DataInfo.RandomSeed)
+setvissim.set_Vissim(Vissim, DataInfo)
 setvissim.set_link_segment(Vissim)
 setvissim.set_queue_counter(Vissim, lanes_with_SH)
 setvissim.set_data_collection(Vissim, lanes_with_SH)
-setvissim.set_vehicleinput(Vissim, SimLen, DataInfo.TimeInterval, VehicleInput)
+setvissim.set_vehicleinput(Vissim, DataInfo, VehicleInput)
 
 
 # 3. Run Simulation
@@ -104,7 +103,7 @@ Vissim = None
 logger.info("Calculating...")
 SH_per_link = cal.cal_SH_per_link(lanes_with_SH)
 
-cal.cal_occuprate_overall(OccupRate_hour, OccupRate_overall, SimLen)
+cal.cal_occuprate_overall(OccupRate_hour, OccupRate_overall, DataInfo.simulation_time)
 cal.cal_qstop_overall(QStop_hour, QStop_overall)
 cal.cal_qstop_per_meter(QStop_hour, QStop_overall, lanes_with_SH)
 
@@ -128,7 +127,7 @@ try:
     wb = excel.Workbooks.Add()
     ws = wb.Worksheets("Sheet1")
 
-    report.print_simul_info(ws, DataInfo, SimLen)
+    report.print_simul_info(ws, DataInfo)
     report.print_explanation(ws)
     report.print_overall(ws, lanes_with_SH, SH_per_link, node_nums, DelayRel_overall, Density_overall, AvgSpeed_overall, QStop_overall, OccupRate_overall, EmissionCO, EmissionVOC)
     report.print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, node_nums, VehNum_hour, QStop_hour, OccupRate_hour, AvgSpeed_hour, LOS_hour, EmissionCO_hour, EmissionVOC_hour)

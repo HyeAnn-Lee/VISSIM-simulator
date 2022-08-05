@@ -113,7 +113,7 @@ def find_incoming_lane(Vissim, lanes_with_SH):
     return
 
 
-def set_Vissim(Vissim, simLen, seed):
+def set_Vissim(Vissim, data):
     # Evaluation
     Vissim.Evaluation.SetAttValue('KeepPrevResults', 1)
 
@@ -138,8 +138,8 @@ def set_Vissim(Vissim, simLen, seed):
     Vissim.Net.NetPara.SetAttValue('UnitSpeedSmall', 0)     # m/s
 
     # Simulation
-    Vissim.Simulation.SetAttValue('SimPeriod', simLen)  # Set simulation period
-    Vissim.Simulation.SetAttValue('RandSeed', seed)  # Choose Random Seed
+    Vissim.Simulation.SetAttValue('SimPeriod', data.simulation_time)
+    Vissim.Simulation.SetAttValue('RandSeed', data.RandomSeed)
     Vissim.Simulation.SetAttValue('UseMaxSimSpeed', True)   # Set Maximum Speed
 
     # Others
@@ -242,10 +242,9 @@ def set_data_collection(Vissim, lanes_with_SH):
     return
 
 
-def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
+def set_vehicleinput(Vissim, data, VehicleInput):
     # Input
-    # > 'SimLen' : int.
-    # > 'TimeInterval' : int.
+    # > 'data' : Init().
     # > 'VehicleInput' : 1D-list of VehInput().
 
     def _change_models():
@@ -356,9 +355,10 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
         for TIkey in range(1, timestep):
             # Here, interval is automatically set to 15min (= 900sec).
             TI_VI.AddTimeInterval(TIkey + 1)
-            if TimeInterval != 900:
-                TI_VI.ItemByKey(TIkey + 1).SetAttValue('Start',
-                                                       TimeInterval * TIkey)
+            if data.TimeInterval != 900:
+                TI_VI.\
+                    ItemByKey(TIkey + 1).\
+                    SetAttValue('Start', data.TimeInterval * TIkey)
 
         return
 
@@ -410,7 +410,7 @@ def set_vehicleinput(Vissim, SimLen, TimeInterval, VehicleInput):
     num_vehtype = len(VehicleInput[0].VehInfo[0].VehComp)
 
     # Validation check
-    if math.ceil(SimLen / TimeInterval) != num_timeint:
+    if math.ceil(data.simulation_time / data.TimeInterval) != num_timeint:
         logger.error("set_vehicleinput():\
             The number of sheets in VehicleInput Excel file is incorrect...\
             Check the file again.")

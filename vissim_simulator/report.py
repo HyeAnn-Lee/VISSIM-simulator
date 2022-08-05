@@ -235,11 +235,10 @@ def _print_row_item(ws, row_name, metric, list_1D, SH_per_link=None,
     return
 
 
-def print_simul_info(ws, data, SimLen):
+def print_simul_info(ws, data):
     # Input
     # > 'ws'        : Excel worksheet.
     # > 'data'      : Init().
-    # > 'SimLen'    : int.
 
     start_row = row
     _print_text(ws, "$ Simulation Info")
@@ -260,7 +259,7 @@ def print_simul_info(ws, data, SimLen):
     ws.Cells(row - 1, 3).Value = data.RandomSeed
 
     _print_text(ws, "* Simulation time (sec) : ")
-    ws.Cells(row - 1, 3).Value = SimLen
+    ws.Cells(row - 1, 3).Value = data.simulation_time
 
     _print_text(ws, "* Comment : ")
     ws.Cells(row - 1, 3).Value = data.Comment

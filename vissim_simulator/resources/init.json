@@ -6,6 +6,7 @@
     },
     "Settings" : {
         "RandomSeed" : -1,
+        "Simulation period [sec]" : 3600,
         "TimeInterval of VehicleInput" : 3600,
         "Comment" : ""
     }
