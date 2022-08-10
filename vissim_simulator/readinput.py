@@ -36,8 +36,9 @@ class Init:
 
 
 class SigControl:
-    def __init__(self, name):
+    def __init__(self, name, offset_info):
         self.Name = name    # string
+        self.offset_info = offset_info  # (Int, Int). (offset[sec], main 현시)
         self.SigInd = []    # 2D-list of characters 'R', 'G' or 'Y'.
         self.BreakAt = []   # 1D-list of int.
         self.total_simulation = 0    # int
@@ -105,26 +106,33 @@ def read_signal(wb, Signal, sim_len):
             # Each element of 'SigInd' will contain signal information
             # ('R', 'G', 'Y') from all "signal group"s in one signal step.
 
-            sigind = [None] * len(sg_nums)
+            sigind = [None] * max(sg_nums)
 
-            for row in range(1, len(sg_nums)+1):
+            for row in range(1, max(sg_nums)+1):
                 value = ws.Cells(NUM_DISCRIPTION_LINE + row, column).Value
+
+                # Break if signal time met.
+                if isinstance(value, float):
+                    break
+
                 if value not in ['R', 'G', 'Y']:
-                    logger.error("_read_signal_seq() : Invalid signal from xlsx... You must use either 'R', 'G' or 'Y'.")
+                    logger.error("_read_signal_seq(): Invalid signal from xlsx...\
+                                        You must use either 'R', 'G' or 'Y'.")
                 sigind[sg_nums[row-1]-1] = value
             sigcon.SigInd.append(sigind)
             column += 1
 
         return
 
-    def _read_signal_time(sigcon, offset):
+    def _read_signal_time(sigcon):
         # Input
         #   'sigcon' : SigControl() with self.Name and self.SigInd.
-        #   'offset' : offset of each intersection. (offset[sec], main 현시).
         #
         # Read signal information of '현시 시간 배분' table.
 
-        row = NUM_DISCRIPTION_LINE + len(sigcon.SigInd[0]) + 1
+        actual_sg = len(sigcon.SigInd[0]) - sigcon.SigInd.count(None)
+        row = NUM_DISCRIPTION_LINE + actual_sg + 1
+        offset = sigcon.offset_info
         column = 3 + offset[1] - 1
 
         period = 0
@@ -154,6 +162,7 @@ def read_signal(wb, Signal, sim_len):
                 row += 1
                 column = 3
 
+        sigcon.BreakAt = [0 for _ in range(offset_info[1]-1)] + sigcon.BreakAt
         sigcon.total_simulation = int(accTime)
 
         return
@@ -174,18 +183,18 @@ def read_signal(wb, Signal, sim_len):
         for i in range(1, num_intersections+1):
             ws = wb.Worksheets(i+1)
 
-            # SigControl.Name
-            sigcontrol = SigControl(ws.name)
+            # SigControl.Name & .offset_info
+            sigcontrol = SigControl(ws.name, offset_info[ws.name])
 
             # SigControl.SigInd
             _read_signal_seq(sigcontrol)
-            main_signal = offset_info[ws.name][1]
+            main_signal = sigcontrol.offset_info[1]
             sigcontrol.SigInd =\
                 sigcontrol.SigInd[main_signal-1:]\
                 + sigcontrol.SigInd[:main_signal-1]
 
             # SigControl.BreakAt
-            _read_signal_time(sigcontrol, offset_info[ws.name])
+            _read_signal_time(sigcontrol)
 
             Signal.append(sigcontrol)
 
