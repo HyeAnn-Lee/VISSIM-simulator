@@ -89,7 +89,7 @@ def read_signal(wb, Signal, sim_len):
         #
         # Read signal information of '현시' table.
 
-        sg_nums = []
+        sg_nums = []    # Signal group No's.
 
         # Read signal group No.
         row = NUM_DISCRIPTION_LINE + 1
@@ -120,15 +120,15 @@ def read_signal(wb, Signal, sim_len):
     def _read_signal_time(sigcon, offset):
         # Input
         #   'sigcon' : SigControl() with self.Name and self.SigInd.
-        #   'offset' : offset of each intersection
+        #   'offset' : offset of each intersection. (offset[sec], main 현시).
         #
         # Read signal information of '현시 시간 배분' table.
 
         row = NUM_DISCRIPTION_LINE + len(sigcon.SigInd[0]) + 1
-        column = 3
+        column = 3 + offset[1] - 1
 
         period = 0
-        accTime = offset
+        accTime = offset[0]
         sigcon.BreakAt.append(accTime)
 
         while ws.Cells(row, column).Value:
@@ -143,10 +143,11 @@ def read_signal(wb, Signal, sim_len):
             sigcon.BreakAt.append(accTime)
             column += 1
             if column - 3 == len(sigcon.SigInd):
-                if offset > period:
+                if row != (NUM_DISCRIPTION_LINE + len(sigcon.SigInd[0]) + 1)\
+                 and offset[0] > period:
                     logger.error(
                         "at _read_signal_time():\t"
-                        + f"Signal offset ({offset} sec) is larger than "
+                        + f"Signal offset ({offset[0]} sec) is larger than "
                         + f"signal period ({int(period)} sec). "
                         + f"Check '{sigcon.Name}' sheet again.")
                 period = 0
@@ -161,20 +162,28 @@ def read_signal(wb, Signal, sim_len):
         num_worksheets = wb.Worksheets.Count
         num_intersections = num_worksheets - 1
 
-        offset_info = dict()    # signal offset of each intersection
+        # signal offset of each intersection
+        offset_info = dict()    # (Int, Int) = (offset[sec], main 현시)
         ws = wb.Worksheets(1)
         for col in range(2, num_intersections+2):
             name = ws.Cells(NUM_DISCRIPTION_LINE + 1, col).Value
             offset = int(ws.Cells(NUM_DISCRIPTION_LINE + 2, col).Value)
-            offset_info[name] = offset
+            main_signal = int(ws.Cells(NUM_DISCRIPTION_LINE + 3, col).Value)
+            offset_info[name] = (offset, main_signal)
 
         for i in range(1, num_intersections+1):
             ws = wb.Worksheets(i+1)
 
             # SigControl.Name
             sigcontrol = SigControl(ws.name)
+
             # SigControl.SigInd
             _read_signal_seq(sigcontrol)
+            main_signal = offset_info[ws.name][1]
+            sigcontrol.SigInd =\
+                sigcontrol.SigInd[main_signal-1:]\
+                + sigcontrol.SigInd[:main_signal-1]
+
             # SigControl.BreakAt
             _read_signal_time(sigcontrol, offset_info[ws.name])
 
