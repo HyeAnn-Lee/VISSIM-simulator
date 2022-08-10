@@ -143,11 +143,13 @@ def set_Vissim(Vissim, data):
     Vissim.Simulation.SetAttValue('UseMaxSimSpeed', True)   # Set Maximum Speed
 
     # Others
-
-    # Activate QuickMode
-    Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode", 1)
-    # Stop updating Vissim workspace (network editor, list and chart)
-    Vissim.SuspendUpdateGUI()
+    if data.quick_mode:
+        # Activate QuickMode
+        Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode", 1)
+        # Stop updating Vissim workspace (network editor, list and chart)
+        Vissim.SuspendUpdateGUI()
+    else:
+        Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode", 0)
 
     return
 

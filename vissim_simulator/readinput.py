@@ -69,6 +69,7 @@ def read_json(filename):
     data.VissimInput = data_dict['TargetFile']['VissimInput']
 
     data.RandomSeed = data_dict['Settings']['RandomSeed']
+    data.quick_mode = data_dict['Settings']['Quick Mode']
     data.simulation_time = data_dict['Settings']['Simulation period [sec]']
     data.TimeInterval = data_dict['Settings']['TimeInterval of VehicleInput']
     data.Comment = data_dict['Settings']['Comment']
