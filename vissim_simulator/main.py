@@ -18,7 +18,7 @@ import setvissim
 from variable import *
 
 Path('./log').mkdir(parents=True, exist_ok=True)
-config = json.load(open("./logger.json"))
+config = json.load(open("resources/logger.json"))
 logging.config.dictConfig(config)
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ start_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 # 1. Read Excel
 logger.info("Reading an input file...")
 DataInfo = readinput.\
-            read_json(Path().absolute()/"vissim_simulator/resources/init.json")
+            read_json(Path().absolute()/"resources/init.json")
 
 try:
     excel = com.Dispatch("Excel.Application")
