@@ -6,7 +6,7 @@ import logging
 import logging.config
 from pathlib import Path
 
-config = json.load(open("./logger.json"))
+config = json.load(open("resources/logger.json"))
 logging.config.dictConfig(config)
 logger = logging.getLogger(__name__)
 
