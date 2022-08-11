@@ -163,7 +163,7 @@ def read_signal(wb, Signal, sim_len):
                 row += 1
                 column = 3
 
-        sigcon.BreakAt = [0 for _ in range(offset_info[1]-1)] + sigcon.BreakAt
+        sigcon.BreakAt = [0 for _ in range(offset[1]-1)] + sigcon.BreakAt
         sigcon.total_simulation = int(accTime)
 
         return
