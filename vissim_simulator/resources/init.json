@@ -2,7 +2,8 @@
     "TargetFile" : {
         "Signal" : "C:\\Users\\leehyean\\Desktop\\마유로(19,18,22,2,21,20,17,1)\\Signal.xlsx",
         "VehicleInput" : "C:\\Users\\leehyean\\Desktop\\마유로(19,18,22,2,21,20,17,1)\\VehicleInput.xlsx",
-        "VissimInput" : "C:\\Users\\leehyean\\Desktop\\마유로(19,18,22,2,21,20,17,1)\\마유로.inpx"
+        "VissimInput" : "C:\\Users\\leehyean\\Desktop\\마유로(19,18,22,2,21,20,17,1)\\마유로.inpx",
+        "Static Vehicle Routes" : "C:\\Users\\HyeAnn\\Desktop\\vissim_for_20220818\\마유로_Static Vehicle Routes.xlsx"
     },
     "Settings" : {
         "RandomSeed" : -1,

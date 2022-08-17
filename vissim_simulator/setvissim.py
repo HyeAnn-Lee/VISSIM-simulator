@@ -454,3 +454,24 @@ def set_vehicleinput(Vissim, data, VehicleInput):
                 Vissim.Net.VehicleCompositions.ItemByKey(key))
 
     return
+
+
+def set_static_vehicle_route(Vissim, Static_Vehicle_Routes):
+    column_names = Static_Vehicle_Routes[0]
+    id1 = column_names.index('VehRoutDec'.capitalize())
+    id2 = column_names.index('No'.capitalize())
+    id3 = column_names.index('RelFlow(1)'.capitalize())
+
+    vrs_iter = Vissim.Net.VehicleRouteStatics.Iterator
+    while vrs_iter.Valid:
+        att_vehroutdec = vrs_iter.Item.AttValue('VehRoutDec')
+        att_no = vrs_iter.Item.AttValue('No')
+
+        filtered_list = list(filter(lambda x: x[id1] == att_vehroutdec,
+                                    Static_Vehicle_Routes[1]))
+        for tup in filtered_list:
+            if tup[id2] == att_no:
+                vrs_iter.Item.SetAttValue('RelFlow(1)', tup[id3])
+
+        vrs_iter.Next()
+    return

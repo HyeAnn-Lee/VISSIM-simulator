@@ -37,6 +37,8 @@ try:
     readinput.read_signal(wb1, Signal, DataInfo.simulation_time)
     wb2 = excel.Workbooks.Open(DataInfo.VehicleInput)
     readinput.read_vehicleinput(wb2, VehicleInput)
+    wb3 = excel.Workbooks.Open(DataInfo.static_vehicle_routes)
+    readinput.read_signal(wb3, Static_Vehicle_Routes)
     excel.Quit()
 
 except Exception as e:
@@ -45,6 +47,7 @@ except Exception as e:
 finally:
     wb1 = None
     wb2 = None
+    wb3 = None
     excel = None
 
 BreakAt = readinput.set_accum_break(Signal)
@@ -71,6 +74,7 @@ setvissim.set_link_segment(Vissim)
 setvissim.set_queue_counter(Vissim, lanes_with_SH)
 setvissim.set_data_collection(Vissim, lanes_with_SH)
 setvissim.set_vehicleinput(Vissim, DataInfo, VehicleInput)
+setvissim.set_static_vehicle_route(Vissim, Static_Vehicle_Routes)
 
 
 # 3. Run Simulation

@@ -5,6 +5,7 @@
 # Read Input
 Signal = []
 VehicleInput = []
+Static_Vehicle_Routes = []
 
 # Vissim
 lanes_with_SH = list()

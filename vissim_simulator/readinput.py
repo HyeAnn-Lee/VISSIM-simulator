@@ -16,6 +16,7 @@ class Init:
         self.Signal = ""        # string: absolute path of signal Excel file.
         self.VehicleInput = ""  # string: abs path of vehicle input Excel file.
         self.VissimInput = ""   # string: absolute path of Vissim inpx file.
+        self.static_vehicle_routes = ""     # string: abs path of Static Vehicle Routes Excel file.
         self.RandomSeed = -1    # int
         self.simulation_time = 600  # int
         self.TimeInterval = 900     # int
@@ -67,6 +68,8 @@ def read_json(filename):
     data.Signal = data_dict['TargetFile']['Signal']
     data.VehicleInput = data_dict['TargetFile']['VehicleInput']
     data.VissimInput = data_dict['TargetFile']['VissimInput']
+    data.static_vehicle_routes =\
+        data_dict['TargetFile']['Static Vehicle Routes']
 
     data.RandomSeed = data_dict['Settings']['RandomSeed']
     data.quick_mode = data_dict['Settings']['Quick Mode']
@@ -120,6 +123,7 @@ def read_signal(wb, Signal, sim_len):
                     logger.error("_read_signal_seq(): Invalid signal from xlsx...\
                                         You must use either 'R', 'G' or 'Y'.")
                 sigind[sg_nums[row-1]-1] = value
+
             sigcon.SigInd.append(sigind)
             column += 1
 
@@ -290,6 +294,50 @@ def read_vehicleinput(wb, VehicleInput):
     for vehinput in VehicleInput:
         if len(vehinput.VehInfo) != num_link:
             logger.error("read_vehicleinput() : The number of links in VehicleInput Excel file is different in some sheets... Check the file again.")
+
+    return
+
+
+def read_static_vehicle_routes(wb, Static_Vehicle_Routes):
+    try:
+        ws = wb.Worksheets(1)
+
+        # cell A1: "$VISION"
+        # cell A2: "* File: ..."
+        row = 2
+        while ws.Cells(row, 1).Value.startswith('*'):
+            row += 1
+
+        # cell A{row}: "$VEHICLEROUTESTATIC ..."
+        col = 1
+        column_names = []
+        while True:
+            value = ws.Cells(row, col).Value
+            if not value:
+                break
+            column_names.append(value.split(':')[-1])
+            col += 1
+
+        Static_Vehicle_Routes.append(tuple(column_names))
+        row += 1
+
+        # cell A{row}: "6", B{row}: "1", ...
+        data = []
+        while ws.Cells(row, 1).Value:
+            single_route = []
+            for col in range(1, len(column_names)+1):
+                value = ws.Cells(row, col).Value
+                single_route.append(str(value))
+            data.append(tuple(single_route))
+            row += 1
+
+        Static_Vehicle_Routes.append(data)
+
+    except Exception as e:
+        print('\t', sys.exc_info()[0], e)
+
+    finally:
+        ws = None
 
     return
 
