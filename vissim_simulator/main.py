@@ -107,7 +107,7 @@ cal.cal_occuprate_overall(OccupRate_hour, OccupRate_overall, DataInfo.simulation
 cal.cal_qstop_overall(QStop_hour, QStop_overall)
 cal.cal_qstop_per_meter(QStop_hour, QStop_overall, lanes_with_SH)
 
-network_filename = Path(DataInfo.VissimInput).stem  # without extension (.inpx)
+network_filename, _extention = DataInfo.VissimInput.split('.')
 
 linkseg_result = f'{network_filename}_Link Segment Results_001.att'
 cal.extract_from_linkseg(linkseg_result, lanes_with_SH, Density_overall, DelayRel_overall, AvgSpeed_overall)
