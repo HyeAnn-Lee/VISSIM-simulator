@@ -195,8 +195,8 @@ def read_signal(wb, Signal, sim_len):
             _read_signal_seq(sigcontrol)
             main_signal = sigcontrol.offset_info[1]
             sigcontrol.SigInd =\
-                sigcontrol.SigInd[main_signal-1:]\
-                + sigcontrol.SigInd[:main_signal-1]
+                sigcontrol.SigInd[main_signal-2:]\
+                + sigcontrol.SigInd[:main_signal-2]
 
             # SigControl.BreakAt
             _read_signal_time(sigcontrol)
