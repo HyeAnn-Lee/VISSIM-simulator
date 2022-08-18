@@ -456,9 +456,9 @@ def set_vehicleinput(Vissim, data, VehicleInput):
 
 def set_static_vehicle_route(Vissim, Static_Vehicle_Routes):
     column_names = Static_Vehicle_Routes[0]
-    id1 = column_names.index('VehRoutDec'.capitalize())
-    id2 = column_names.index('No'.capitalize())
-    id3 = column_names.index('RelFlow(1)'.capitalize())
+    id1 = column_names.index('VehRoutDec'.upper())
+    id2 = column_names.index('No'.upper())
+    id3 = column_names.index('RelFlow(1)'.upper())
 
     vrs_iter = Vissim.Net.VehicleRouteStatics.Iterator
     while vrs_iter.Valid:
