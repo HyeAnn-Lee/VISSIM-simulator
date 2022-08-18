@@ -99,9 +99,7 @@ def find_incoming_lane(Vissim, lanes_with_SH):
     SH_Iter = Vissim.Net.SignalHeads.Iterator
     while SH_Iter.Valid:
         SH = SH_Iter.Item
-        linkNo, laneNo = SH.AttValue('Lane').split('-')
-        linkNo = int(linkNo)
-        laneNo = int(laneNo)
+        linkNo, laneNo = map(int, SH.AttValue('Lane').split('-'))
         length = Vissim.Net.Links.ItemByKey(linkNo).AttValue('Length2D')
         lanes_with_SH.append((linkNo, laneNo, SH.AttValue('Pos'), length))
         SH_Iter.Next()

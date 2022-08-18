@@ -46,9 +46,7 @@ except Exception as e:
     print(e)
 
 finally:
-    wb1 = None
-    wb2 = None
-    wb3 = None
+    wb1 = wb2 = wb3 = None
     excel = None
 
 BreakAt = readinput.set_accum_break(Signal)

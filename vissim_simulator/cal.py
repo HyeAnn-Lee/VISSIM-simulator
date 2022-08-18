@@ -23,7 +23,7 @@ def _read_result_att(att_file):
     # Find the line NOT starts with *.
     att_file.readline()         # Pass the first line.
     line = att_file.readline()  # Start from the second line.
-    while '*' == line[0]:
+    while line.startswith('*'):
         line = att_file.readline()
     # Here, 'line' starts with $.
 
