@@ -38,7 +38,7 @@ try:
     wb2 = excel.Workbooks.Open(DataInfo.VehicleInput)
     readinput.read_vehicleinput(wb2, VehicleInput)
     wb3 = excel.Workbooks.Open(DataInfo.static_vehicle_routes)
-    readinput.read_signal(wb3, Static_Vehicle_Routes)
+    readinput.read_static_vehicle_routes(wb3, Static_Vehicle_Routes)
     excel.Quit()
 
 except Exception as e:

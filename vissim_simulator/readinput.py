@@ -339,6 +339,19 @@ def read_static_vehicle_routes(wb, Static_Vehicle_Routes):
     finally:
         ws = None
 
+    # Static_Vehicle_Routes ==
+    # [
+    #  ('VEHROUTDEC', 'NO', 'NAME', 'FORMULA', 'DESTLINK', 'DESTPOS', 'RELFLOW(1)'),
+    #  [('6.0', '1.0', 'None', 'None', '10028.0', '9.649', '3.0'),
+    #   ('6.0', '2.0', 'None', 'None', '10027.0', '9.763', '6.0'),
+    #   ('6.0', '3.0', 'None', 'None', '10029.0', '10.284', '1.0'),
+    #   ('7.0', '1.0', 'None', 'None', '10025.0', '11.319', '3.0'),
+    #   ('7.0', '2.0', 'None', 'None', '10024.0', '12.447', '6.0'),
+    #   ('7.0', '3.0', 'None', 'None', '10026.0', '14.177', '1.0'),
+    #   ('9.0', '1.0', 'None', 'None', '10042.0', '15.812', '6.0'),
+    #   ...]
+    # ]
+
     return
 
 
