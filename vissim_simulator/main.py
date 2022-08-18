@@ -9,7 +9,6 @@ import math
 from pathlib import Path
 
 import win32com.client as com
-from tqdm import tqdm
 
 import cal
 import readinput
@@ -18,10 +17,7 @@ import runsimul
 import setvissim
 from variable import *
 
-Path('./log').mkdir(parents=True, exist_ok=True)
-config = json.load(open("resources/logger.json"))
-logging.config.dictConfig(config)
-logger = logging.getLogger(__name__)
+# from tqdm import tqdm
 
 start_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 

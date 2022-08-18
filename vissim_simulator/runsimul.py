@@ -4,6 +4,7 @@
 import json
 import logging
 import logging.config
+import sys
 
 config = json.load(open("resources/logger.json"))
 logging.config.dictConfig(config)
