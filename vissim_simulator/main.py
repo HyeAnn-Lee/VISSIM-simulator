@@ -9,6 +9,7 @@ import math
 from pathlib import Path
 
 import win32com.client as com
+from tqdm import tqdm
 
 import cal
 import readinput
@@ -82,13 +83,17 @@ logger.info("Running simulation...")
 Vissim.Simulation.RunSingleStep()
 
 # Extract data per signal period
-break_at = 0
-runsimul.set_signal(Vissim, Signal, break_at)
-for break_at in BreakAt:
-    Vissim.Simulation.SetAttValue('SimBreakAt', break_at)   # Set break_at
-    Vissim.Simulation.RunContinuous()       # Run simulation until 'break_at'
-    runsimul.set_signal(Vissim, Signal, break_at)               # Set signal
-Vissim.Simulation.RunContinuous()
+break_at = pbar_update = 0
+with tqdm(total=DataInfo.simulation_time) as pbar:
+    runsimul.set_signal(Vissim, Signal, break_at)
+    for break_at in BreakAt:
+        Vissim.Simulation.SetAttValue('SimBreakAt', break_at)   # Set break_at
+        Vissim.Simulation.RunContinuous()   # Run simulation until 'break_at'
+        runsimul.set_signal(Vissim, Signal, break_at)   # Set signal
+
+        pbar.update(break_at-pbar_update)
+        pbar_update = break_at
+    Vissim.Simulation.RunContinuous()
 
 # Extract data per hour
 hour_step = math.ceil(break_at/3600)
