@@ -81,6 +81,7 @@ logger.info("Running simulation...")
 Vissim.Simulation.RunSingleStep()
 
 # Extract data per signal period
+"""
 break_at = pbar_update = 0
 with tqdm(total=DataInfo.simulation_time) as pbar:
     runsimul.set_signal(Vissim, Signal, break_at)
@@ -92,6 +93,14 @@ with tqdm(total=DataInfo.simulation_time) as pbar:
         pbar.update(break_at-pbar_update)
         pbar_update = break_at
     Vissim.Simulation.RunContinuous()
+"""
+break_at = 0
+runsimul.set_signal(Vissim, Signal, break_at)
+for break_at in runsimul.progressbar(BreakAt):
+    Vissim.Simulation.SetAttValue('SimBreakAt', break_at)   # Set break_at
+    Vissim.Simulation.RunContinuous()   # Run simulation until 'break_at'
+    runsimul.set_signal(Vissim, Signal, break_at)   # Set signal
+Vissim.Simulation.RunContinuous()
 
 # Extract data per hour
 hour_step = math.ceil(break_at/3600)

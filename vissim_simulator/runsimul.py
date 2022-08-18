@@ -28,6 +28,21 @@ def _get_AttValue_num(item, attribute):
     return value
 
 
+def progressbar(it, prefix="", size=60, out=sys.stdout):
+    # https://stackoverflow.com/a/34482761/14257620
+    count = len(it)
+
+    def show(j):
+        x = int(size*j/count)
+        print(f"{prefix}[{u'█'*x}{('.'*(size-x))}] {j}/{count}", end='\r', file=out, flush=True)
+
+    show(0)
+    for i, item in enumerate(it):
+        yield item
+        show(i+1)
+    print("\n", flush=True, file=out)
+
+
 def set_signal(Vissim, list_of_sigcon, break_at):
     # Input
     # > 'list_of_sigcon'    : 1D-list of SigControl().
