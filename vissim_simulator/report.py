@@ -196,8 +196,8 @@ def _print_row_item(ws, row_name, metric, list_1D, SH_per_link=None,
     # Create 1D-list 'target_list'.
     if metric == Metric.Link:   # Modify list_1D in case of link metric.
         if SH_per_link is None:
-            logger.error("_print_row_item():\
-                            SH_per_link must be given in case of link metric.")
+            logger.error("_print_row_item(): "
+                         + "SH_per_link must be given in case of link metric.")
         target_list = copy.deepcopy(list_1D)
         for index in range(len(SH_per_link) - 1, -1, -1):
             for _ in range(SH_per_link[index][1] - 1):
@@ -252,11 +252,17 @@ def print_simul_info(ws, data):
     _print_text(ws, "* Vehicle Input : ")
     ws.Cells(row - 1, 3).Value = data.VehicleInput
 
+    _print_text(ws, "* Static Vehicle Routes : ")
+    ws.Cells(row - 1, 3).Value = data.static_vehicle_routes
+
     _print_text(ws, "* Date : ")
     ws.Cells(row - 1, 3).Value = datetime.datetime.now().strftime("%c")
 
     _print_text(ws, "* Random Seed : ")
     ws.Cells(row - 1, 3).Value = data.RandomSeed
+
+    _print_text(ws, "* Quick Mode : ")
+    ws.Cells(row - 1, 3).Value = data.quick_mode
 
     _print_text(ws, "* Simulation time (sec) : ")
     ws.Cells(row - 1, 3).Value = data.simulation_time
@@ -277,26 +283,26 @@ def print_explanation(ws):
 
     start_row = row
     _print_text(ws, "$ Measurements")
-    _print_text(ws, "* Delay : Total delay divided by total travel time of all\
-                                vehicles in this link segment [%]")
+    _print_text(ws, "* Delay : "
+                    + "Total delay divided by total travel time of all "
+                    + "vehicles in this link segment [%]")
     _print_text(ws, "* Density : Vehicle density [/km]")
     _print_text(ws, "* Emissions CO : Quantity of carbon monoxide [g]")
-    _print_text(ws, "* Emissions VOC : Quantity of volatile organic compounds\
-                                        [g]")
+    _print_text(ws, "* Emissions VOC : "
+                    + "Quantity of volatile organic compounds [g]")
     _print_text(ws, "* LOS : Level of service (A ~ F).")
-    _print_text(ws,
-                "* OccupRate : Share of time [0% ~ 100%] of the last\
-                                simulation step, in which at least one data\
-                                collection point of this data collection\
-                                measurement was occupied.")
-    _print_text(ws,
-                "* QueueStop : The number of queue stops per meter. A queue\
-                                stop counts when a vehicle that is directly\
-                                upstream or within the queue length falls\
-                                below the speed of the Begin attribute defined\
-                                for the queue condition. [/m]")
-    _print_text(ws, "* Speed : Average speed of vehicles passing through the\
-                                section [km/h]")
+    _print_text(ws, "* OccupRate : "
+                    + "Share of time [0% ~ 100%] of the last simulation step, "
+                    + "in which at least one data collection point of this "
+                    + "data collection measurement was occupied.")
+    _print_text(ws, "* QueueStop : "
+                    + "The number of queue stops per meter. A queue stop "
+                    + "counts when a vehicle that is directly upstream or "
+                    + "within the queue length falls below the speed of the "
+                    + "Begin attribute defined for the queue condition. [/m]")
+    _print_text(ws, "* Speed : "
+                    + "Average speed of vehicles passing through the section "
+                    + "[km/h]")
     _print_text(ws, "*")
 
     _fill_color(ws, 36, start_row, 1, row - 2, 1)

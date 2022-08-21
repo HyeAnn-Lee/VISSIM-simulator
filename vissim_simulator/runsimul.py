@@ -24,7 +24,8 @@ def _get_AttValue_num(item, attribute):
         return 0
 
     if value < 0:
-        logger.error("_get_AttValue_num() : Negative AttValue has been detected...")
+        logger.error("_get_AttValue_num():\t"
+                     + "Negative AttValue has been detected.")
 
     return value
 

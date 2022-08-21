@@ -150,8 +150,8 @@ def extract_from_linkseg(file, lanes_with_SH, Density_overall,
         return string.split(" ")[0]
 
     if not Path(file).exists():
-        logger.error("extract_from_linkseg():\
-                        Link Segment Results att file is missing.")
+        logger.error("extract_from_linkseg():\t"
+                     + "Link Segment Results att file is missing.")
 
     # Read att file to find column names.
     att_file = open(file, "r")

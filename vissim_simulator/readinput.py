@@ -120,8 +120,9 @@ def read_signal(wb, Signal, sim_len):
                     break
 
                 if value not in ['R', 'G', 'Y']:
-                    logger.error("_read_signal_seq(): Invalid signal from xlsx...\
-                                        You must use either 'R', 'G' or 'Y'.")
+                    logger.error("_read_signal_seq():\t"
+                                 + "Invalid signal from xlsx. "
+                                 + "You must use either 'R', 'G' or 'Y'.")
                 sigind[sg_nums[row-1]-1] = value
 
             sigcon.SigInd.append(sigind)
@@ -147,9 +148,11 @@ def read_signal(wb, Signal, sim_len):
         while ws.Cells(row, column).Value:
             time = ws.Cells(row, column).Value
             if not isinstance(time, float):
-                logger.error("_read_signal_time() : You should use an integer for signal time...")
+                logger.error("_read_signal_time():\t"
+                             + "You should use an integer for signal time.")
             if (int(time) != time) or (time < 1):
-                logger.error("_read_signal_time() : Signal time should be a positive integer...")
+                logger.error("_read_signal_time():\t"
+                             + "Signal time should be a positive integer.")
 
             period += time
             accTime += time
@@ -211,7 +214,8 @@ def read_signal(wb, Signal, sim_len):
 
     # 'Signal' becomes a 1D-list of SigControl().
     if not Signal:
-        logger.error("read_signal() : Signal file is empty.... Check json file again.")
+        logger.error("read_signal():\t"
+                     + "Signal file is empty. Check json file again.")
 
     for sigcontrol in Signal:
         if sigcontrol.total_simulation > sim_len:
@@ -289,11 +293,14 @@ def read_vehicleinput(wb, VehicleInput):
 
     # 'VehicleInput' becomes a 1D-list of VehInput().
     if not VehicleInput:
-        logger.error("read_vehicleinput() : VehicleInput file is empty.... Check json file again.")
+        logger.error("read_vehicleinput():\t"
+                     + "VehicleInput file is empty. Check json file again.")
     num_link = len(VehicleInput[0].VehInfo)
     for vehinput in VehicleInput:
         if len(vehinput.VehInfo) != num_link:
-            logger.error("read_vehicleinput() : The number of links in VehicleInput Excel file is different in some sheets... Check the file again.")
+            logger.error("read_vehicleinput():\t"
+                         + "The number of links in VehicleInput Excel file is "
+                         + "different in some sheets. Check the file again.")
 
     return
 
@@ -372,7 +379,7 @@ def set_accum_break(list_of_SigControl):
     accum_break.sort()
     accum_break.remove(0)
     if not accum_break:
-        logger.error("set_accum_break() : Simulation time is zero...\
-                                        Check signal Excel file again.")
+        logger.error("set_accum_break():\t"
+                     + "Simulation time is 0. Check signal Excel file again.")
 
     return accum_break[:-1]

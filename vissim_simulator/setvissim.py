@@ -18,7 +18,10 @@ def _find_vissim_path():
     if not directories:
         logger.error(f"{path_ptvvision} does not exist. Is Vissim installed?")
     if len(directories) > 1:
-        logger.warning(f"Multiple directories in {path_ptvvision}. Are multiple versions of Vissim installed? Program will proceeds with {directories[-1]} anyway.")
+        logger.warning(f"Multiple directories in {path_ptvvision}. "
+                       + "Are multiple versions of Vissim installed? "
+                       + f"Program will proceeds with {directories[-1]} "
+                       + "anyway.")
     vissim_path = path_ptvvision/directories[-1]/'Exe'
     logger.info(f"Vissim exe located at {vissim_path}")
     return vissim_path
@@ -58,7 +61,8 @@ def check_sig_file(Vissim):
     while SC_Iter.Valid:
         sig_file = SC_Iter.Item.AttValue('SupplyFile2')
         if (sig_file != "") and not Path(sig_file).exists():
-            logger.error("check_sig_file() : At least one of sig files is missing.")
+            logger.error("check_sig_file():\t"
+                         + "At least one of sig files is missing.")
 
         SC_Iter.Next()
 
@@ -75,7 +79,8 @@ def get_travtm_info(Vissim):
     # Check for duplicates
     tempset = set(link)
     if len(link) != len(tempset):
-        logger.error("get_travtm_info() : There is an invalid Vehicle Travel Time Measurement.")
+        logger.error("get_travtm_info():\t"
+                     + "There is an invalid Vehicle Travel Time Measurement.")
 
     return link
 
@@ -411,9 +416,9 @@ def set_vehicleinput(Vissim, data, VehicleInput):
 
     # Validation check
     if math.ceil(data.simulation_time / data.TimeInterval) != num_timeint:
-        logger.error("set_vehicleinput():\
-            The number of sheets in VehicleInput Excel file is incorrect...\
-            Check the file again.")
+        logger.error("set_vehicleinput():\t"
+                     + "The number of sheets in VehicleInput Excel file is "
+                     + "incorrect. Check the file again.")
 
     # Remove existing VI
     All_VIs = Vissim.Net.VehicleInputs.GetAll()
