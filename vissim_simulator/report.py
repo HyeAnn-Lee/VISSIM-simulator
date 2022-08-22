@@ -238,37 +238,37 @@ def _print_row_item(ws, row_name, metric, list_1D, SH_per_link=None,
 def print_simul_info(ws, data):
     # Input
     # > 'ws'        : Excel worksheet.
-    # > 'data'      : Init().
+    # > 'data'      : dict.
 
     start_row = row
     _print_text(ws, "$ Simulation Info")
 
     _print_text(ws, "* Network File : ")
-    ws.Cells(row - 1, 3).Value = data.VissimInput
+    ws.Cells(row - 1, 3).Value = data['vissim_inpx']
 
     _print_text(ws, "* Signal : ")
-    ws.Cells(row - 1, 3).Value = data.Signal
+    ws.Cells(row - 1, 3).Value = data['signal_xlsx']
 
     _print_text(ws, "* Vehicle Input : ")
-    ws.Cells(row - 1, 3).Value = data.VehicleInput
+    ws.Cells(row - 1, 3).Value = data['vehicle_input_xlsx']
 
     _print_text(ws, "* Static Vehicle Routes : ")
-    ws.Cells(row - 1, 3).Value = data.static_vehicle_routes
+    ws.Cells(row - 1, 3).Value = data['vehicle_routes_xlsx']
 
     _print_text(ws, "* Date : ")
     ws.Cells(row - 1, 3).Value = datetime.datetime.now().strftime("%c")
 
     _print_text(ws, "* Random Seed : ")
-    ws.Cells(row - 1, 3).Value = data.RandomSeed
+    ws.Cells(row - 1, 3).Value = data['random_seed']
 
     _print_text(ws, "* Quick Mode : ")
-    ws.Cells(row - 1, 3).Value = data.quick_mode
+    ws.Cells(row - 1, 3).Value = data['quick_mode']
 
     _print_text(ws, "* Simulation time (sec) : ")
-    ws.Cells(row - 1, 3).Value = data.simulation_time
+    ws.Cells(row - 1, 3).Value = data['simulation_time']
 
     _print_text(ws, "* Comment : ")
-    ws.Cells(row - 1, 3).Value = data.Comment
+    ws.Cells(row - 1, 3).Value = data['comment']
 
     _print_text(ws, "*")
 

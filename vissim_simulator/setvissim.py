@@ -51,7 +51,11 @@ def set_randomseed(seed):
     if 0 < seed < (1 << 31):
         return seed
 
-    return random.randint(1, (1 << 31) - 1)
+    if seed == -1:
+        return random.randint(1, (1 << 31) - 1)
+
+    logger.error("Invalid random seed.")
+    return
 
 
 def check_sig_file(Vissim):
@@ -141,12 +145,12 @@ def set_Vissim(Vissim, data):
     Vissim.Net.NetPara.SetAttValue('UnitSpeedSmall', 0)     # m/s
 
     # Simulation
-    Vissim.Simulation.SetAttValue('SimPeriod', data.simulation_time)
-    Vissim.Simulation.SetAttValue('RandSeed', data.RandomSeed)
+    Vissim.Simulation.SetAttValue('SimPeriod', data['simulation_time'])
+    Vissim.Simulation.SetAttValue('RandSeed', data['random_seed'])
     Vissim.Simulation.SetAttValue('UseMaxSimSpeed', True)   # Set Maximum Speed
 
     # Others
-    if data.quick_mode:
+    if data['quick_mode']:
         # Activate QuickMode
         Vissim.Graphics.CurrentNetworkWindow.SetAttValue("QuickMode", 1)
         # Stop updating Vissim workspace (network editor, list and chart)
@@ -249,7 +253,7 @@ def set_data_collection(Vissim, lanes_with_SH):
 
 def set_vehicleinput(Vissim, data, VehicleInput):
     # Input
-    # > 'data' : Init().
+    # > 'data' : dict.
     # > 'VehicleInput' : 1D-list of VehInput().
 
     def _change_models():
@@ -415,7 +419,8 @@ def set_vehicleinput(Vissim, data, VehicleInput):
     num_vehtype = len(VehicleInput[0].VehInfo[0].VehComp)
 
     # Validation check
-    if math.ceil(data.simulation_time / data.TimeInterval) != num_timeint:
+    repetition = data['simulation_time'] / data['vehicle_input_period']
+    if math.ceil(repetition) != num_timeint:
         logger.error("set_vehicleinput():\t"
                      + "The number of sheets in VehicleInput Excel file is "
                      + "incorrect. Check the file again.")

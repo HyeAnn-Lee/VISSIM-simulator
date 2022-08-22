@@ -19,22 +19,27 @@ from variable import *
 
 # from tqdm import tqdm
 
+datainfo = dict()
+datainfo['random_seed'] = -1
+datainfo['quick_mode'] = True
+datainfo['simulation_time'] = 600
+datainfo['vehicle_input_period'] = 900
+datainfo['comment'] = ""
 start_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 # 1. Read Excel
 logger.info("Reading an input file...")
-DataInfo = readinput.\
-            read_json(Path().absolute()/"resources/init.json")
+readinput.read_json(datainfo, Path().absolute()/"resources/init.json")
 
 try:
     excel = com.Dispatch("Excel.Application")
     excel.Visible = False
     excel.DisplayAlerts = False
-    wb1 = excel.Workbooks.Open(DataInfo.Signal)
-    readinput.read_signal(wb1, Signal, DataInfo.simulation_time)
-    wb2 = excel.Workbooks.Open(DataInfo.VehicleInput)
+    wb1 = excel.Workbooks.Open(datainfo['signal_xlsx'])
+    readinput.read_signal(wb1, Signal, datainfo['simulation_time'])
+    wb2 = excel.Workbooks.Open(datainfo['vehicle_input_xlsx'])
     readinput.read_vehicleinput(wb2, VehicleInput)
-    wb3 = excel.Workbooks.Open(DataInfo.static_vehicle_routes)
+    wb3 = excel.Workbooks.Open(datainfo['vehicle_routes_xlsx'])
     readinput.read_static_vehicle_routes(wb3, Static_Vehicle_Routes)
     excel.Quit()
 
@@ -49,14 +54,14 @@ BreakAt = readinput.set_accum_break(Signal)
 
 # 2. Set Vissim
 setvissim.convert_signal_to_enum(Signal)
-DataInfo.RandomSeed = setvissim.set_randomseed(DataInfo.RandomSeed)
+datainfo['random_seed'] = setvissim.set_randomseed(datainfo['random_seed'])
 
 # Connecting the COM Server => Open a new Vissim Window:
 logger.info("Setting Vissim...")
 Vissim = com.Dispatch("Vissim.Vissim")
 
 # Load a Vissim Network:
-Vissim.LoadNet(DataInfo.VissimInput)
+Vissim.LoadNet(datainfo['vissim_inpx'])
 
 setvissim.check_sig_file(Vissim)
 
@@ -64,11 +69,11 @@ Link_TT = setvissim.get_travtm_info(Vissim)
 node_nums = setvissim.get_all_node(Vissim)
 setvissim.find_incoming_lane(Vissim, lanes_with_SH)
 
-setvissim.set_Vissim(Vissim, DataInfo)
+setvissim.set_Vissim(Vissim, datainfo)
 setvissim.set_link_segment(Vissim)
 setvissim.set_queue_counter(Vissim, lanes_with_SH)
 setvissim.set_data_collection(Vissim, lanes_with_SH)
-setvissim.set_vehicleinput(Vissim, DataInfo, VehicleInput)
+setvissim.set_vehicleinput(Vissim, datainfo, VehicleInput)
 setvissim.set_static_vehicle_route(Vissim, Static_Vehicle_Routes)
 
 
@@ -79,7 +84,7 @@ Vissim.Simulation.RunSingleStep()
 # Extract data per signal period
 """
 break_at = pbar_update = 0
-with tqdm(total=DataInfo.simulation_time) as pbar:
+with tqdm(total=datainfo['simulation_time']) as pbar:
     runsimul.set_signal(Vissim, Signal, break_at)
     for break_at in BreakAt:
         Vissim.Simulation.SetAttValue('SimBreakAt', break_at)   # Set break_at
@@ -115,11 +120,11 @@ Vissim = None
 logger.info("Calculating...")
 SH_per_link = cal.cal_SH_per_link(lanes_with_SH)
 
-cal.cal_occuprate_overall(OccupRate_hour, OccupRate_overall, DataInfo.simulation_time)
+cal.cal_occuprate_overall(OccupRate_hour, OccupRate_overall, datainfo['simulation_time'])
 cal.cal_qstop_overall(QStop_hour, QStop_overall)
 cal.cal_qstop_per_meter(QStop_hour, QStop_overall, lanes_with_SH)
 
-network_filename, _extention = DataInfo.VissimInput.split('.')
+network_filename, _extention = datainfo['vissim_inpx'].split('.')
 
 linkseg_result = f'{network_filename}_Link Segment Results_001.att'
 cal.extract_from_linkseg(linkseg_result, lanes_with_SH, Density_overall, DelayRel_overall, AvgSpeed_overall)
@@ -139,7 +144,7 @@ try:
     wb = excel.Workbooks.Add()
     ws = wb.Worksheets("Sheet1")
 
-    report.print_simul_info(ws, DataInfo)
+    report.print_simul_info(ws, datainfo)
     report.print_explanation(ws)
     report.print_overall(ws, lanes_with_SH, SH_per_link, node_nums, DelayRel_overall, Density_overall, AvgSpeed_overall, QStop_overall, OccupRate_overall, EmissionCO, EmissionVOC)
     report.print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, node_nums, VehNum_hour, QStop_hour, OccupRate_hour, AvgSpeed_hour, LOS_hour, EmissionCO_hour, EmissionVOC_hour)

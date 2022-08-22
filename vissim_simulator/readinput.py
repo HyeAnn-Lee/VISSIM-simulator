@@ -11,30 +11,6 @@ config = json.load(open("resources/logger.json"))
 logging.config.dictConfig(config)
 logger = logging.getLogger(__name__)
 
-class Init:
-    def __init__(self):
-        self.Signal = ""        # string: absolute path of signal Excel file.
-        self.VehicleInput = ""  # string: abs path of vehicle input Excel file.
-        self.VissimInput = ""   # string: absolute path of Vissim inpx file.
-        self.static_vehicle_routes = ""     # string: abs path of Static Vehicle Routes Excel file.
-        self.RandomSeed = -1    # int
-        self.simulation_time = 600  # int
-        self.TimeInterval = 900     # int
-        self.Comment = ""       # string
-
-    def check_validation(self):
-        if not isinstance(self.RandomSeed, int):
-            logger.error(
-                "RandomSeed should be an integer. Check json file again.")
-        if not isinstance(self.simulation_time, int):
-            logger.error(
-                "Simulation period should be an positive integer.",
-                "Check json file again.")
-        if not isinstance(self.TimeInterval, int):
-            logger.error(
-                "TimeInterval of VehicleInput should be an positive integer.",
-                "Check json file again.")
-
 
 class SigControl:
     def __init__(self, name, offset_info):
@@ -54,8 +30,9 @@ class VehInput:
 NUM_DISCRIPTION_LINE = 3
 
 
-def read_json(filename):
+def read_json(datainfo, filename):
     # Input
+    # > 'datainfo' : dict.
     # > 'filename' : Absolute path of json file. <class 'pathlib.WindowsPath'>.
     #
     # Output
@@ -64,22 +41,33 @@ def read_json(filename):
     with filename.open('r', encoding='UTF8') as init_json:
         data_dict = json.load(init_json)
 
-    data = Init()
-    data.Signal = data_dict['TargetFile']['Signal']
-    data.VehicleInput = data_dict['TargetFile']['VehicleInput']
-    data.VissimInput = data_dict['TargetFile']['VissimInput']
-    data.static_vehicle_routes =\
-        data_dict['TargetFile']['Static Vehicle Routes']
+    comp1 = data_dict['TargetFile']
+    comp2 = data_dict['Settings']
 
-    data.RandomSeed = data_dict['Settings']['RandomSeed']
-    data.quick_mode = data_dict['Settings']['Quick Mode']
-    data.simulation_time = data_dict['Settings']['Simulation period [sec]']
-    data.TimeInterval = data_dict['Settings']['TimeInterval of VehicleInput']
-    data.Comment = data_dict['Settings']['Comment']
+    datainfo['signal_xlsx'] = comp1['Signal']
+    datainfo['vehicle_input_xlsx'] = comp1['VehicleInput']
+    datainfo['vissim_inpx'] = comp1['VissimInput']
+    datainfo['vehicle_routes_xlsx'] = comp1['Static Vehicle Routes']
 
-    data.check_validation()
+    datainfo['random_seed'] = comp2['RandomSeed']
+    datainfo['quick_mode'] = comp2['Quick Mode']
+    datainfo['simulation_time'] = comp2['Simulation period [sec]']
+    datainfo['vehicle_input_period'] = comp2['TimeInterval of VehicleInput']
+    datainfo['comment'] = comp2['Comment']
 
-    return data
+    if not isinstance(datainfo['random_seed'], int):
+        logger.error(
+            "RandomSeed should be an integer. Check json file again.")
+    if not isinstance(datainfo['simulation_time'], int):
+        logger.error(
+            "Simulation period should be a positive integer.",
+            "Check json file again.")
+    if not isinstance(datainfo['vehicle_input_period'], int):
+        logger.error(
+            "TimeInterval of VehicleInput should be a positive integer.",
+            "Check json file again.")
+
+    return
 
 
 def read_signal(wb, Signal, sim_len):
