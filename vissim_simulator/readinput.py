@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 class SigControl:
     def __init__(self, name, offset_info):
-        self.Name = name    # string
+        self.Name = name        # string
         self.offset_info = offset_info  # (Int, Int). (offset[sec], main 현시)
-        self.SigInd = []    # 2D-list of characters 'R', 'G' or 'Y'.
-        self.BreakAt = []   # 1D-list of int.
-        self.total_simulation = 0    # int
+        self.SigInd = []        # 2D-list of characters 'R', 'G' or 'Y'.
+        self.signal_time = []   # 1D-list of int.
+        self.BreakAt = []       # 1D-list of int.
 
 
 class VehInput:
@@ -70,29 +70,32 @@ def read_json(datainfo, filename):
     return
 
 
-def read_signal(wb, Signal, sim_len):
+def read_signal_xlsx(wb, Signal):
     # Input
     # > 'wb' : Excel file with contents of signal information.
     # > 'Signal' : Empty list.
-    # > 'sim_len' : simulation period in seconds.
 
     def _read_signal_seq(sigcon):
         # Input
-        #   'sigcon' : SigControl() with self.Name.
+        #   'sigcon' : SigControl() with self.Name and self.offset_info.
         #
         # Read signal information of '현시' table.
 
         sg_nums = []    # Signal group No's.
 
         # Read signal group No.
+        # Column B
         row = NUM_DISCRIPTION_LINE + 1
-        while isinstance(ws.Cells(row, 3).Value, str):
-            sg_no = ws.Cells(row, 2).Value
+        while isinstance(ws.Cells(row, 3).Value, str):  # G, Y, R
+            sg_no = ws.Cells(row, 2).Value  # Signal group No.
             sg_nums.append(int(sg_no))
             row += 1
-        sg_nums = tuple(sg_nums)
+
+        # ex1) sg_nums = [7, 1, 4, 8, 2, 3, 5, 6]
+        # ex2) sg_nums = [6, 1, 2, 4, 7, 8]
 
         # Read and store signal information.
+        # Column C ~
         column = 3
         while ws.Cells(NUM_DISCRIPTION_LINE + 1, column).Value:
             # Each element of 'SigInd' will contain signal information
@@ -100,18 +103,21 @@ def read_signal(wb, Signal, sim_len):
 
             sigind = [None] * max(sg_nums)
 
-            for row in range(1, max(sg_nums)+1):
-                value = ws.Cells(NUM_DISCRIPTION_LINE + row, column).Value
+            for row in range(len(sg_nums)):
+                value = ws.Cells(NUM_DISCRIPTION_LINE + row + 1, column).Value
 
                 # Break if signal time met.
-                if isinstance(value, float):
+                if not isinstance(value, str):
                     break
 
                 if value not in ['R', 'G', 'Y']:
                     logger.error("_read_signal_seq():\t"
                                  + "Invalid signal from xlsx. "
                                  + "You must use either 'R', 'G' or 'Y'.")
-                sigind[sg_nums[row-1]-1] = value
+                sigind[sg_nums[row]-1] = value
+
+            # ex1) sigind = ['R', 'R', 'R', 'R', 'R', 'R', 'G', 'R']
+            # ex2) sigind = ['R', 'G', None, 'R', None, 'R', 'G', 'R']
 
             sigcon.SigInd.append(sigind)
             column += 1
@@ -126,40 +132,28 @@ def read_signal(wb, Signal, sim_len):
 
         actual_sg = len(sigcon.SigInd[0]) - sigcon.SigInd.count(None)
         row = NUM_DISCRIPTION_LINE + actual_sg + 1
-        offset = sigcon.offset_info
-        column = 3 + offset[1] - 1
 
-        period = 0
-        accTime = offset[0]
-        sigcon.BreakAt.append(accTime)
+        column = 3
 
         while ws.Cells(row, column).Value:
             time = ws.Cells(row, column).Value
-            if not isinstance(time, float):
+            if (not isinstance(time, float)) or (not time.is_integer()):
                 logger.error("_read_signal_time():\t"
-                             + "You should use an integer for signal time.")
-            if (int(time) != time) or (time < 1):
-                logger.error("_read_signal_time():\t"
-                             + "Signal time should be a positive integer.")
+                             + "Signal time should be non-negative integers.")
 
-            period += time
-            accTime += time
-            sigcon.BreakAt.append(accTime)
+            sigcon.signal_time.append(time)
             column += 1
             if column - 3 == len(sigcon.SigInd):
-                if row != (NUM_DISCRIPTION_LINE + len(sigcon.SigInd[0]) + 1)\
-                 and offset[0] > period:
-                    logger.error(
-                        "at _read_signal_time():\t"
-                        + f"Signal offset ({offset[0]} sec) is larger than "
-                        + f"signal period ({int(period)} sec). "
-                        + f"Check '{sigcon.Name}' sheet again.")
-                period = 0
                 row += 1
                 column = 3
 
-        sigcon.BreakAt = [0 for _ in range(offset[1]-1)] + sigcon.BreakAt
-        sigcon.total_simulation = int(accTime)
+        offset = sigcon.offset_info[0]
+        period = sum(sigcon.signal_time[:len(sigcon.SigInd)])
+        if offset > period:
+            logger.error("at _read_signal_time():\t"
+                         + f"Signal offset ({offset} sec) is larger than "
+                         + f"signal period ({int(period)} sec). "
+                         + f"Check '{sigcon.Name}' sheet again.")
 
         return
 
@@ -168,28 +162,28 @@ def read_signal(wb, Signal, sim_len):
         num_intersections = num_worksheets - 1
 
         # signal offset of each intersection
-        offset_info = dict()    # (Int, Int) = (offset[sec], main 현시)
+        offset_info = dict()
+
+        # Sheet1
         ws = wb.Worksheets(1)
+        # Column B ~
         for col in range(2, num_intersections+2):
             name = ws.Cells(NUM_DISCRIPTION_LINE + 1, col).Value
             offset = int(ws.Cells(NUM_DISCRIPTION_LINE + 2, col).Value)
             main_signal = int(ws.Cells(NUM_DISCRIPTION_LINE + 3, col).Value)
-            offset_info[name] = (offset, main_signal)
+            offset_info[name] = (offset, main_signal)  # SigControl.offset_info
 
-        for i in range(1, num_intersections+1):
-            ws = wb.Worksheets(i+1)
+        # Sheet2 ~
+        for i in range(2, num_worksheets+1):
+            ws = wb.Worksheets(i)
 
             # SigControl.Name & .offset_info
             sigcontrol = SigControl(ws.name, offset_info[ws.name])
 
             # SigControl.SigInd
             _read_signal_seq(sigcontrol)
-            main_signal = sigcontrol.offset_info[1]
-            sigcontrol.SigInd =\
-                sigcontrol.SigInd[main_signal-2:]\
-                + sigcontrol.SigInd[:main_signal-2]
 
-            # SigControl.BreakAt
+            # SigControl.signal_time
             _read_signal_time(sigcontrol)
 
             Signal.append(sigcontrol)
@@ -204,23 +198,6 @@ def read_signal(wb, Signal, sim_len):
     if not Signal:
         logger.error("read_signal():\t"
                      + "Signal file is empty. Check json file again.")
-
-    for sigcontrol in Signal:
-        if sigcontrol.total_simulation > sim_len:
-            sigcontrol.BreakAt = [i for i in sigcontrol.BreakAt if i < sim_len]
-            sigcontrol.BreakAt.append(sim_len)
-            sigcontrol.total_simulation = sim_len
-            logger.info(
-                sigcontrol.Name
-                + f'\tsimulation time changed to: {sim_len} [s]')
-
-        if sigcontrol.total_simulation < sim_len:
-            logger.error(
-                "read_signal():"
-                + "\tSimulation time of each sheet should be"
-                + f"at least {sim_len} [s]."
-                + f"(Currently {sigcontrol.total_simulation} [s])"
-                + f"Check '{sigcontrol.Name}' sheet again.")
 
     return
 
@@ -350,24 +327,58 @@ def read_static_vehicle_routes(wb, Static_Vehicle_Routes):
     return
 
 
-def set_accum_break(list_of_SigControl):
+def rearrange_Signal(Signal):
     # Input
-    # > 'list_of_SigControl' : 1D-list of SigControl().
+    # > 'Signal' : 1D-list of SigControl().
+    #
+    # Rearrange 'Signal' with signal offset.
+
+    for sigcontrol in Signal:
+        offset, main_signal = sigcontrol.offset_info
+        if offset == 0:
+            continue
+
+        period1 = sigcontrol.signal_time[:len(sigcontrol.SigInd)]
+        i = main_signal*2-2
+
+        i -= 1
+        while offset > period1[i]:
+            offset -= period1[i]
+            i -= 1
+
+        period1[i] = offset
+        sigcontrol.signal_time[:len(sigcontrol.SigInd)] = period1[i:]
+
+        sigcontrol.SigInd = sigcontrol.SigInd[i:] + sigcontrol.SigInd[:i]
+
+    return
+
+
+def calculate_breakpoint(Signal, simulation_len):
+    # Input
+    # > 'Signal' : 1D-list of SigControl().
+    # > 'simulation_len' : simulation period in seconds.
     #
     # Output
-    # > 'accum_break' : 1D-list of int.
+    # > 1D-list of int.
     #
-    # Aggregate breakpoints of all SigControls.
+    # Calculate and aggregate breakpoints of SigControls.
 
     accum_break = []
-    for sigcon in list_of_SigControl:
-        accum_break += sigcon.BreakAt
-    temp_set = set(accum_break)
-    accum_break = list(temp_set)
+
+    for sigcontrol in Signal:
+        sum = 0
+        sigcontrol.BreakAt = [sum]
+        for sec in sigcontrol.signal_time:
+            sum += sec
+            sigcontrol.BreakAt.append(sum)
+        accum_break += sigcontrol.BreakAt
+
+    accum_break = list(set(accum_break))
     accum_break.sort()
     accum_break.remove(0)
     if not accum_break:
-        logger.error("set_accum_break():\t"
+        logger.error("calculate_breakpoint():\t"
                      + "Simulation time is 0. Check signal Excel file again.")
 
-    return accum_break[:-1]
+    return [i for i in accum_break if i < simulation_len]

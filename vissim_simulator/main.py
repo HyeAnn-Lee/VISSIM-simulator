@@ -36,7 +36,7 @@ try:
     excel.Visible = False
     excel.DisplayAlerts = False
     wb1 = excel.Workbooks.Open(datainfo['signal_xlsx'])
-    readinput.read_signal(wb1, Signal, datainfo['simulation_time'])
+    readinput.read_signal_xlsx(wb1, Signal)
     wb2 = excel.Workbooks.Open(datainfo['vehicle_input_xlsx'])
     readinput.read_vehicleinput(wb2, VehicleInput)
     wb3 = excel.Workbooks.Open(datainfo['vehicle_routes_xlsx'])
@@ -50,7 +50,8 @@ finally:
     wb1 = wb2 = wb3 = None
     excel = None
 
-BreakAt = readinput.set_accum_break(Signal)
+readinput.rearrange_Signal(Signal)
+BreakAt = readinput.calculate_breakpoint(Signal, datainfo['simulation_time'])
 
 # 2. Set Vissim
 setvissim.convert_signal_to_enum(Signal)
