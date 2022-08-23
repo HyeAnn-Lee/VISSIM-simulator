@@ -470,16 +470,23 @@ def set_static_vehicle_route(Vissim, Static_Vehicle_Routes):
     id2 = column_names.index('No'.upper())
     id3 = column_names.index('RelFlow(1)'.upper())
 
-    vrs_iter = Vissim.Net.VehicleRouteStatics.Iterator
-    while vrs_iter.Valid:
-        att_vehroutdec = vrs_iter.Item.AttValue('VehRoutDec')
-        att_no = vrs_iter.Item.AttValue('No')
+    vrds_iter = Vissim.Net.VehicleRoutingDecisionsStatic.Iterator
+    while vrds_iter.Valid:
+        vehicle_routing_decisions = vrds_iter.Item
 
-        filtered_list = list(filter(lambda x: x[id1] == att_vehroutdec,
-                                    Static_Vehicle_Routes[1]))
-        for tup in filtered_list:
-            if tup[id2] == att_no:
-                vrs_iter.Item.SetAttValue('RelFlow(1)', tup[id3])
+        vrs_iter = vehicle_routing_decisions.VehRoutSta.Iterator
+        while vrs_iter.Valid:
+            att_vehroutdec = vrs_iter.Item.AttValue('VehRoutDec')
+            att_no = vrs_iter.Item.AttValue('No')
 
-        vrs_iter.Next()
+            filtered_list = list(filter(lambda x: x[id1] == att_vehroutdec,
+                                        Static_Vehicle_Routes[1]))
+            for tup in filtered_list:
+                if tup[id2] == att_no:
+                    vrs_iter.Item.SetAttValue('RelFlow(1)', tup[id3])
+
+            vrs_iter.Next()
+
+        vrds_iter.Next()
+
     return
