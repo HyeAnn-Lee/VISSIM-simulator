@@ -287,9 +287,9 @@ def print_explanation(ws):
                     + "Total delay divided by total travel time of all "
                     + "vehicles in this link segment [%]")
     _print_text(ws, "* Density : Vehicle density [/km]")
-    _print_text(ws, "* Emissions CO : Quantity of carbon monoxide [g]")
-    _print_text(ws, "* Emissions VOC : "
-                    + "Quantity of volatile organic compounds [g]")
+#    _print_text(ws, "* Emissions CO : Quantity of carbon monoxide [g]")
+#    _print_text(ws, "* Emissions VOC : "
+#                    + "Quantity of volatile organic compounds [g]")
     _print_text(ws, "* LOS : Level of service (A ~ F).")
     _print_text(ws, "* OccupRate : "
                     + "Share of time [0% ~ 100%] of the last simulation step, "
@@ -341,15 +341,15 @@ def print_overall(ws, lanes_with_SH, SH_per_link, node_nums, DelayRel_overall,
     _fill_color(ws, 19, start_row + 2, 2, row - 1, 2)
     _print_text(ws, "*")
 
-    if node_nums:
-        mid_row = row
-        _print_column_name(ws, Metric.Node, node_nums)
-
-        _print_row_item(ws, "Emissions CO",     Metric.Node, EmissionCO)
-        _print_row_item(ws, "Emissions VOC",    Metric.Node, EmissionVOC)
-
-        _fill_color(ws, 19, mid_row, 2, row - 1, 2)
-        _print_text(ws, "*")
+#    if node_nums:
+#        mid_row = row
+#        _print_column_name(ws, Metric.Node, node_nums)
+#
+#        _print_row_item(ws, "Emissions CO",     Metric.Node, EmissionCO)
+#        _print_row_item(ws, "Emissions VOC",    Metric.Node, EmissionVOC)
+#
+#        _fill_color(ws, 19, mid_row, 2, row - 1, 2)
+#        _print_text(ws, "*")
 
     _fill_color(ws, 36, start_row, 1, row - 2, 1)
 
@@ -413,9 +413,9 @@ def print_hour(ws, lanes_with_SH, SH_per_link, Link_TT, node_nums, VehNum_hour,
 
     if node_nums:
         _print_Metric("* LOS", Metric.Node, node_nums, LOS_hour)
-        _print_Metric("* Emissions CO", Metric.Node, node_nums, EmissionCO_hour)
-        _print_Metric("* Emissions VOC", Metric.Node, node_nums,
-                      EmissionVOC_hour)
+#        _print_Metric("* Emissions CO", Metric.Node, node_nums, EmissionCO_hour)
+#        _print_Metric("* Emissions VOC", Metric.Node, node_nums,
+#                      EmissionVOC_hour)
 
     _fill_color(ws, 36, start_row, 1, row - 2, 1)
 
