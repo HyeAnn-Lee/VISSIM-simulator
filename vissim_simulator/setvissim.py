@@ -476,7 +476,7 @@ def set_static_vehicle_route(Vissim, Static_Vehicle_Routes):
 
         vrs_iter = vehicle_routing_decisions.VehRoutSta.Iterator
         while vrs_iter.Valid:
-            att_vehroutdec = vrs_iter.Item.AttValue('VehRoutDec')
+            att_vehroutdec = int(vrs_iter.Item.AttValue('VehRoutDec'))
             att_no = vrs_iter.Item.AttValue('No')
 
             filtered_list = list(filter(lambda x: x[id1] == att_vehroutdec,
