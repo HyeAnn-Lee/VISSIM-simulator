@@ -10,6 +10,11 @@ from pathlib import Path
 
 import win32com.client as com
 
+Path('./log').mkdir(parents=True, exist_ok=True)
+config = json.load(open("resources/logger.json"))
+logging.config.dictConfig(config)
+logger = logging.getLogger(__name__)
+
 import cal
 import readinput
 import report
