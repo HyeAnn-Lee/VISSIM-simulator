@@ -27,7 +27,8 @@ class VehInput:
         self.VehInfo = []       # elements will be namedtuple 'LinkInfo'.
 
 
-NUM_DISCRIPTION_LINE = 3
+BUF_ROW = 3
+BUF_COL = 2
 
 
 def read_json(datainfo, filename):
@@ -85,7 +86,7 @@ def read_signal_xlsx(wb, Signal):
 
         # Read signal group No.
         # Column B
-        row = NUM_DISCRIPTION_LINE + 1
+        row = BUF_ROW + 1
         while isinstance(ws.Cells(row, 3).Value, str):  # G, Y, R
             sg_no = ws.Cells(row, 2).Value  # Signal group No.
             sg_nums.append(int(sg_no))
@@ -97,14 +98,14 @@ def read_signal_xlsx(wb, Signal):
         # Read and store signal information.
         # Column C ~
         column = 3
-        while ws.Cells(NUM_DISCRIPTION_LINE + 1, column).Value:
+        while ws.Cells(BUF_ROW + 1, column).Value:
             # Each element of 'SigInd' will contain signal information
             # ('R', 'G', 'Y') from all "signal group"s in one signal step.
 
             sigind = [None] * max(sg_nums)
 
             for row in range(len(sg_nums)):
-                value = ws.Cells(NUM_DISCRIPTION_LINE + row + 1, column).Value
+                value = ws.Cells(BUF_ROW + row + 1, column).Value
 
                 # Break if signal time met.
                 if not isinstance(value, str):
@@ -131,7 +132,7 @@ def read_signal_xlsx(wb, Signal):
         # Read signal information of '현시 시간 배분' table.
 
         actual_sg = len(sigcon.SigInd[0]) - sigcon.SigInd.count(None)
-        row = NUM_DISCRIPTION_LINE + actual_sg + 1
+        row = BUF_ROW + actual_sg + 1
 
         column = 3
 
@@ -168,9 +169,9 @@ def read_signal_xlsx(wb, Signal):
         ws = wb.Worksheets(1)
         # Column B ~
         for col in range(2, num_intersections+2):
-            name = ws.Cells(NUM_DISCRIPTION_LINE + 1, col).Value
-            offset = int(ws.Cells(NUM_DISCRIPTION_LINE + 2, col).Value)
-            main_signal = int(ws.Cells(NUM_DISCRIPTION_LINE + 3, col).Value)
+            name = ws.Cells(BUF_ROW + 1, col).Value
+            offset = int(ws.Cells(BUF_ROW + 2, col).Value)
+            main_signal = int(ws.Cells(BUF_ROW + 3, col).Value)
             offset_info[name] = (offset, main_signal)  # SigControl.offset_info
 
         # Sheet2 ~
@@ -213,17 +214,17 @@ def read_vehicleinput(wb, VehicleInput):
         # > 'vehin' : VehInput() with self.TimeInt.
 
         num_vehcomp = 0
-        while ws.Cells(NUM_DISCRIPTION_LINE + 2, num_vehcomp + 2).Value:
+        while ws.Cells(BUF_ROW + 2, num_vehcomp + 2).Value:
             num_vehcomp += 1
 
-        row = NUM_DISCRIPTION_LINE + 3
-        while ws.Cells(row, 1).Value:
+        row = BUF_ROW + 3
+        while ws.Cells(row, BUF_COL + 1).Value:
             # linkinfo.LinkNo   : int
-            LinkNo = int(ws.Cells(row, 1).Value)
+            LinkNo = int(ws.Cells(row, BUF_COL + 1).Value)
 
             # linkinfo.VehComp  : 1D-tuple of positive floats
             temp_list = []
-            for column in range(2, num_vehcomp + 2):
+            for column in range(BUF_COL + 2, num_vehcomp + BUF_COL + 2):
                 volume = ws.Cells(row, column).Value
                 if not isinstance(volume, (int, float)):
                     volume = 0
