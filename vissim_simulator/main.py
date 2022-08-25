@@ -8,12 +8,12 @@ import logging.config
 import math
 from pathlib import Path
 
-import win32com.client as com
-
 Path('./log').mkdir(parents=True, exist_ok=True)
 config = json.load(open("resources/logger.json"))
 logging.config.dictConfig(config)
 logger = logging.getLogger(__name__)
+
+import win32com.client as com
 
 import cal
 import readinput
@@ -40,16 +40,19 @@ try:
     excel = com.Dispatch("Excel.Application")
     excel.Visible = False
     excel.DisplayAlerts = False
+    logger.info("Reading signal xlsx...")
     wb1 = excel.Workbooks.Open(datainfo['signal_xlsx'])
     readinput.read_signal_xlsx(wb1, Signal)
+    logger.info("Reading vehicle xlsx...")
     wb2 = excel.Workbooks.Open(datainfo['vehicle_input_xlsx'])
     readinput.read_vehicleinput(wb2, VehicleInput)
+    logger.info("Reading Static Vehicle Routes xlsx...")
     wb3 = excel.Workbooks.Open(datainfo['vehicle_routes_xlsx'])
     readinput.read_static_vehicle_routes(wb3, Static_Vehicle_Routes)
     excel.Quit()
 
 except Exception as e:
-    print(e)
+    logger.error(e)
 
 finally:
     wb1 = wb2 = wb3 = None
