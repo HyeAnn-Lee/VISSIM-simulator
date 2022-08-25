@@ -214,7 +214,7 @@ def read_vehicleinput(wb, VehicleInput):
         # > 'vehin' : VehInput() with self.TimeInt.
 
         num_vehcomp = 0
-        while ws.Cells(BUF_ROW + 2, num_vehcomp + 2).Value:
+        while ws.Cells(BUF_ROW + 2, num_vehcomp + BUF_COL + 2).Value:
             num_vehcomp += 1
 
         row = BUF_ROW + 3
